@@ -21,8 +21,8 @@ services:
     restart: always
 
   settlement-backend:
-    build: .
-    image: settlement:1.0.0-compose
+#    build: .
+    image: catwalk1215/settlement:5a293ab24f6008676e421d1a30a254a813d31513
     ports:
       - 80:8080
     networks:
