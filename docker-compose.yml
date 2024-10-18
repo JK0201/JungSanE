@@ -1,0 +1,44 @@
+version: '3'
+services:
+  settlement-mysql:
+    image: mysql:8.4.2
+    ports:
+      - 3307:3306
+    networks:
+      - settlement
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -password && sleep 5"]
+      interval: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 256M
+    restart: always
+
+  settlement-backend:
+    build: .
+    image: settlement:1.0.0-compose
+    ports:
+      - 80:8080
+    networks:
+      - settlement
+    environment:
+      - DB_URL=${DB_URL}
+      - DB_PORT=${DB_PORT}
+    depends_on:
+      settlement-mysql:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 512M
+    restart: on-failure
+
+networks:
+  settlement:
