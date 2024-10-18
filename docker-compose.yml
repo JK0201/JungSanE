@@ -3,7 +3,7 @@ services:
   settlement-mysql:
     image: mysql:8.4.2
     ports:
-      - 3306:3306
+      - 3307:3306
     networks:
       - settlement
     environment:
@@ -21,8 +21,8 @@ services:
     restart: always
 
   settlement-backend:
-#    build: .
-    image: catwalk1215/settlement:f9d010f1e7d65efc5cf5d467f04cf5e5660a7ca3
+    build: .
+    image: settlement:1.0.0-compose
     ports:
       - 80:8080
     networks:
