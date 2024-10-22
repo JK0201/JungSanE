@@ -127,7 +127,7 @@ public class KakaoLoginImpl implements KakaoLogin {
                     .build();
         } catch (JsonProcessingException ex) {
             log.error("JSON 처리 중 오류 발생");
-            // 추후 에러 처리 할 것
+            // FIXME 추후 에러 처리 할 것
             throw new RuntimeException(ex);
         }
     }
@@ -148,7 +148,6 @@ public class KakaoLoginImpl implements KakaoLogin {
         if (user.isEmpty()) {
             User newUser = User.from(currentUserInfo);
             log.info("신규 카카오 유저 = username : {}, email : {}", newUser.getUsername(), newUser.getEmail());
-
             return userRepository.save(newUser);
         }
 

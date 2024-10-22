@@ -24,7 +24,7 @@ public class UserCommandController {
     private String baseUrl;
 
     private final UserCommandService userCommandService;
-
+    
     /**
      * 카카오 로그인 콜백
      * 요청시 클라이언트에서 "Bearer "를 붙여서 요청 (소셜 로그인)

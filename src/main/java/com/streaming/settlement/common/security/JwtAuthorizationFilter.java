@@ -1,7 +1,6 @@
-package com.streaming.settlement.common.security.filter;
+package com.streaming.settlement.common.security;
 
 import com.streaming.settlement.common.config.JwtProvider;
-import com.streaming.settlement.common.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -44,6 +43,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 setAuthentication(userInfo.getSubject());
             } catch (Exception ex) {
                 log.error("Invalid JWT Token = {}", ex.getMessage());
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication failed");
                 return;
             }
         }
