@@ -62,7 +62,7 @@ public class KakaoLoginImpl implements KakaoLogin {
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "authorization_code");
         body.add("client_id", kakaoClientId);
-        body.add("redirect_uri", baseUrl + "/api/user/v1/kakao/callback");
+        body.add("redirect_uri", baseUrl + "/api/v1/user/auth/kakao");
         body.add("code", code);
 
         // 엑세스 토큰 POST 요청 생성

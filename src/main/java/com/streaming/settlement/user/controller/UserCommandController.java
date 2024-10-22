@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserCommandController {
 
@@ -31,9 +31,9 @@ public class UserCommandController {
      *
      * @param code     (String)
      * @param response (HttpServletResponse)
-     * @return 302 Redirect / Cookie (Authorization : Bearer를 제거한 Token)
+     * @return 302 Redirect / Cookie (Authorization : Bearer를 제거한 Token, 클라이언트 요청시 헤더에 "Bearer " 추가)
      */
-    @GetMapping("/v1/kakao/callback")
+    @GetMapping("/v1/user/auth/kakao")
     public ResponseEntity<Void> kakaoCallback(@RequestParam("code") String code, HttpServletResponse response) {
         String token = userCommandService.kakaoLogin(code);
 

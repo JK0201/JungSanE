@@ -78,6 +78,7 @@ public class JwtProvider {
      */
     public boolean validateToken(String token) {
         try {
+
             Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
@@ -103,7 +104,7 @@ public class JwtProvider {
      * @param token (String)
      * @return Claims
      */
-    public Claims parseClaims(String token) {
+    public Claims userInformationFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
