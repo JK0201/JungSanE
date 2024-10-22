@@ -15,11 +15,11 @@ import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
 
+@Slf4j(topic = "JWT 토큰 Provider")
 @Component
-@Slf4j(topic = "JwtProvider")
 public class JwtProvider {
 
-    private static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String AUTHORIZATION_KEY = "auth";
     private static final String BEARER_PREFIX = "Bearer ";
     private static final long ACCESS_TOKEN_EXPIRE_TIME = 60 * 60 * 1000L; // access token 60분
@@ -35,7 +35,13 @@ public class JwtProvider {
         key = Keys.hmacShaKeyFor(bytes);
     }
 
-    // 토큰 생성
+    /**
+     * 토큰 생성
+     *
+     * @param email (String)
+     * @param role  (UserRole)
+     * @return "Bearer " + "JWT Token" (String)
+     */
     public String generateToken(String email, UserRole role) {
         Date date = new Date();
 
@@ -50,7 +56,12 @@ public class JwtProvider {
                         .compact();
     }
 
-    // Header로 받아온 토큰을 Bearer와 분리하여 반환
+    /**
+     * Header로 받아온 토큰을 Bearer와 분리하여 반환
+     *
+     * @param request (HttpServletRequest)
+     * @return JWT Token (String)
+     */
     public String tokenFromHeader(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
@@ -59,7 +70,12 @@ public class JwtProvider {
         return null;
     }
 
-    // 토큰 검증 로직
+    /**
+     * 토큰 검증 로직
+     *
+     * @param token (String)
+     * @return boolean
+     */
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
@@ -81,7 +97,12 @@ public class JwtProvider {
         return false;
     }
 
-    // 토큰에서 사용자 정보 가져오기
+    /**
+     * 토큰에서 사용자 정보 가져오기
+     *
+     * @param token (String)
+     * @return Claims
+     */
     public Claims parseClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
