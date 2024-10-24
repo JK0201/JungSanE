@@ -18,9 +18,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static com.streaming.settlement.jwt.JwtUtil.AUTHORIZATION_KEY;
+import static com.streaming.settlement.jwt.JwtUtil.*;
 
-@Slf4j(topic = "Jwt 인가 필터")
+@Slf4j(topic = "JWT 인가 필터")
 @RequiredArgsConstructor
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
@@ -28,7 +28,14 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String authorization = jwtUtil.tokenFromHeader(request);
+
+        // "/api"로 들어오는 요청이 아닐 경우 다음 필터 진행
+        if (!request.getRequestURI().startsWith("/api")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String authorization = jwtUtil.getAccessTokenFromHeader(request);
 
         log.info("요청 토큰 = {}", authorization);
 
@@ -40,15 +47,23 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         // 토큰이 유효하지 않은 경우 -> 에러 응답
         if (!jwtUtil.validateToken(authorization)) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("유효하지 않은 토큰 입니다.");
             return;
         }
 
         // 토큰이 유요할 경우 토큰에서 유저 정보를 가져옴
         Claims userInfo = jwtUtil.userInformationFromToken(authorization);
-        String username = userInfo.get("username", String.class);
-        String role = userInfo.get(AUTHORIZATION_KEY, String.class);
+        String tokenType = userInfo.get(GRANT_TYPE, String.class);
+        String username = userInfo.get(CLAIM_USERNAME, String.class);
+        String role = userInfo.get(CLAIM_ROLE, String.class);
+
+        // Payload에 Access Token이 아닌 Refresh Token을 넣었을 경우 -> 에러 응답
+        if (!tokenType.equals("access")) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("유효하지 않은 토큰 입니다.");
+            return;
+        }
 
         log.info("요청 유저 = username : {}, role : {}", username, role);
 

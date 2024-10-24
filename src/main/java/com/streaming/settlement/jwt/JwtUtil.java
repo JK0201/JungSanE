@@ -1,6 +1,7 @@
 package com.streaming.settlement.jwt;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.SecurityException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -10,12 +11,10 @@ import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
 
-@Slf4j(topic = "Jwt 토큰 Provider")
+@Slf4j(topic = " 토큰 Provider")
 @Component
 public class JwtUtil {
 
@@ -27,8 +26,12 @@ public class JwtUtil {
     }
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String AUTHORIZATION_KEY = "auth";
-    private final String BEARER_PREFIX = "Bearer ";
+    public static final String GRANT_TYPE = "grant_type";
+    public static final String CLAIM_USERNAME = "username";
+    public static final String CLAIM_ROLE = "role";
+    public static final String TOKEN_PREFIX = "Bearer ";
+    public static final Long ACCESS_TOKEN_EXPIRY_TIME = 1000L;
+    public static final Long REFRESH_TOKEN_EXPIRY_TIME = 86400000L; // Refresh Token 24hrs
 
     /**
      * 토큰 생성
@@ -37,38 +40,44 @@ public class JwtUtil {
      * @param role     (UserRole)
      * @return JWT Token (String)
      */
-    public String generateToken(String username, String role, Long expireTime) {
-        return BEARER_PREFIX +
-                Jwts.builder()
-                        .claim("username", username)
-                        .claim(AUTHORIZATION_KEY, role)
-                        .issuedAt(new Date(System.currentTimeMillis()))
-                        .expiration(new Date(System.currentTimeMillis() + expireTime))
-                        .signWith(secretKey)
-                        .compact();
+    public String generateToken(String tokenType, String username, String role, Long expireTime) {
+        return Jwts.builder()
+                .claim(GRANT_TYPE, tokenType)
+                .claim(CLAIM_USERNAME, username)
+                .claim(CLAIM_ROLE, role)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + expireTime))
+                .signWith(secretKey)
+                .compact();
     }
 
     /**
-     * Header로 받아온 토큰을 "Bearer "와 분리하여 반환
+     * Header로 받아온 Access Token을 "Bearer "와 분리하여 반환
      *
      * @param request (HttpServletRequest)
-     * @return JWT Token (String)
+     * @return Access Token (String)
      */
-    public String tokenFromHeader(HttpServletRequest request) {
+    public String getAccessTokenFromHeader(HttpServletRequest request) {
         String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(TOKEN_PREFIX)) {
             return bearerToken.substring(7); // "Bearer " 이후 뒤쪽의 토큰을 반환
         }
 
-        // 헤더에 없을 경우 쿠키에서 토큰 확인
+        return null;
+    }
+
+    /**
+     * Cookie에서 Refresh Token을 찾아서 반환
+     *
+     * @param request (HttpServletRequest)
+     * @return Refresh Token (String)
+     */
+    public String getRefreshTokenFromCookie(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (AUTHORIZATION_HEADER.equals(cookie.getName())) {
-                    String cookieValue = URLDecoder.decode(cookie.getValue(), StandardCharsets.UTF_8);
-                    if (cookieValue.startsWith(BEARER_PREFIX)) {
-                        return cookieValue.substring(7); // Bearer 이후 토큰 반환
-                    }
+                    return cookie.getValue();
                 }
             }
         }
@@ -91,13 +100,13 @@ public class JwtUtil {
 
             return true;
         } catch (SecurityException | MalformedJwtException ex) {
-            log.error("Invalid JWT signature, 유효하지 않은 JWT 서명 입니다.", ex);
+            log.error("Invalid JWT signature, 유효하지 않은 JWT 서명 입니다.");
         } catch (ExpiredJwtException ex) {
-            log.error("Expired JWT token, 만료된 JWT token 입니다.", ex);
+            log.error("Expired JWT token, 만료된 JWT token 입니다.");
         } catch (UnsupportedJwtException ex) {
-            log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.", ex);
+            log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
         } catch (IllegalArgumentException ex) {
-            log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.", ex);
+            log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
         }
 
         return false;
@@ -116,32 +125,4 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload();
     }
-
-//    public String getUsername(String token) {
-//        return Jwts.parser()
-//                .verifyWith(secretKey)
-//                .build()
-//                .parseSignedClaims(token)
-//                .getPayload()
-//                .get("username", String.class);
-//    }
-//
-//    public String getRole(String token) {
-//        return Jwts.parser()
-//                .verifyWith(secretKey)
-//                .build()
-//                .parseSignedClaims(token)
-//                .getPayload()
-//                .get(AUTHORIZATION_KEY, String.class);
-//    }
-//
-//    public Boolean isExpired(String token) {
-//        return Jwts.parser()
-//                .verifyWith(secretKey)
-//                .build()
-//                .parseSignedClaims(token)
-//                .getPayload()
-//                .getExpiration()
-//                .before(new Date());
-//    }
 }

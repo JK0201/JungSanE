@@ -34,7 +34,6 @@ public class SecurityConfig {
         // HTTP Basic 인증 방식 (disable)
         http.httpBasic(AbstractHttpConfigurer::disable);
 
-
         // Oauth2 (Custom한 OAuth2UserService를 엔드포인트로 설정)
         // customSuccessHandler를 등록하여 로그인 성공시 토큰 발급
         http.oauth2Login((oauth2) -> oauth2
@@ -45,6 +44,7 @@ public class SecurityConfig {
         // 경로 인가 설정
         http.authorizeHttpRequests((authorizeHttpRequests) -> authorizeHttpRequests
                 .requestMatchers("/").permitAll()
+                .requestMatchers("/reissue").permitAll()
                 .anyRequest().authenticated());
 
         // Session 방식 (disable)
