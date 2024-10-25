@@ -1,7 +1,8 @@
 package com.streaming.settlement.user.controller;
 
+import com.streaming.settlement.user.config.JwtUtil;
 import com.streaming.settlement.user.dto.RefreshToken;
-import com.streaming.settlement.user.jwt.JwtUtil;
+import com.streaming.settlement.user.entity.AuthProvider;
 import com.streaming.settlement.user.repository.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
 
-import static com.streaming.settlement.user.jwt.JwtUtil.*;
+import static com.streaming.settlement.user.config.JwtUtil.*;
 
 @Slf4j(topic = "JWT Access Token 재발급")
 @RestController
@@ -49,6 +50,7 @@ public class ReissueController {
         String tokenType = userInfo.get(GRANT_TYPE, String.class);
         String username = userInfo.get(CLAIM_USERNAME, String.class);
         String role = userInfo.get(CLAIM_ROLE, String.class);
+        String authProvider = userInfo.get(CLAIM_PROVIDER, String.class);
 
         // Payload에 Refresh Token이 아닌 Access Token을 넣었을 경우 -> 에러 응답
         if (!tokenType.equals("refresh")) {
@@ -57,7 +59,7 @@ public class ReissueController {
 
         // DB에 Refresh Token이 저장되어 있는지 확인 -> Refresh Token이 없을 경우 에러 응답
         Optional<RefreshToken> existRefreshToken = refreshTokenRepository
-                .findByRefreshTokenAndUsername(username, authorization);
+                .findByRefreshTokenFetchUser(AuthProvider.fromProvider(authProvider), username, authorization);
         if (existRefreshToken.isEmpty()) {
             return new ResponseEntity<>("invalid refresh token", HttpStatus.BAD_REQUEST);
         }
@@ -65,8 +67,8 @@ public class ReissueController {
         log.info("요청 유저 = username : {}, role : {}", username, role);
 
         // Access Token, Refresh Token 생성
-        String accessToken = jwtUtil.generateToken("access", username, role, ACCESS_TOKEN_EXPIRY_TIME);
-        String refreshToken = jwtUtil.generateToken("refresh", username, role, REFRESH_TOKEN_EXPIRY_TIME);
+        String accessToken = jwtUtil.generateToken("access", username, role, authProvider, ACCESS_TOKEN_EXPIRY_TIME);
+        String refreshToken = jwtUtil.generateToken("refresh", username, role, authProvider, REFRESH_TOKEN_EXPIRY_TIME);
 
         // 새로 발급 받은 Refresh Token DB에 업데이트 (의존성 최소화를 위해 merge)
         RefreshToken newRefreshToken = RefreshToken.update(existRefreshToken.get(), refreshToken, REFRESH_TOKEN_EXPIRY_TIME);
@@ -79,9 +81,6 @@ public class ReissueController {
     }
 
     private Cookie createCookie(String cookieValue) {
-        // 토큰을 쿠키에 저장하기 위해 공백 encoding
-//        cookieValue = URLEncoder.encode(cookieValue, StandardCharsets.UTF_8).replaceAll("\\+", "%20");
-
         Cookie cookie = new Cookie(AUTHORIZATION_HEADER, cookieValue);
         cookie.setMaxAge(60 * 60 * 1000);
 //        cookie.setSecure(true) // Https 통신에서만 동작 설정

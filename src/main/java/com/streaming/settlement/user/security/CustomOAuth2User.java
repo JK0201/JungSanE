@@ -1,5 +1,7 @@
-package com.streaming.settlement.user.dto;
+package com.streaming.settlement.user.security;
 
+import com.streaming.settlement.user.dto.User;
+import com.streaming.settlement.user.entity.AuthProvider;
 import com.streaming.settlement.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -42,5 +44,10 @@ public class CustomOAuth2User implements OAuth2User {
     // 고유 아이디값 (Provider + ProviderId)
     public String getUsername() {
         return user.getUsername();
+    }
+
+    // Auth Provider
+    public AuthProvider getAuthProvider() {
+        return user.getAuthProvider();
     }
 }

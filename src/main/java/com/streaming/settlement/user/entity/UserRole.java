@@ -7,7 +7,7 @@ import java.util.Map;
 
 @Getter
 public enum UserRole {
-
+    
     USER("ROLE_USER"),
     UPLOADER("ROLE_UPLOADER");
 

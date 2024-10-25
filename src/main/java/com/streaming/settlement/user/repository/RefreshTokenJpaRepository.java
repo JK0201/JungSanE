@@ -1,5 +1,6 @@
 package com.streaming.settlement.user.repository;
 
+import com.streaming.settlement.user.entity.AuthProvider;
 import com.streaming.settlement.user.entity.RefreshTokenEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,8 +12,11 @@ public interface RefreshTokenJpaRepository extends JpaRepository<RefreshTokenEnt
 
     @Query("select rt from RefreshTokenEntity rt " +
             "join fetch rt.userEntity u " +
-            "where u.username = :username and rt.refreshToken=:refreshToken")
-    Optional<RefreshTokenEntity> findByRefreshTokenAndUsername(
+            "where u.authProvider = :authProvider " +
+            "and u.username = :username " +
+            "and rt.refreshToken=:refreshToken")
+    Optional<RefreshTokenEntity> findByRefreshTokenFetchUser(
+            @Param("authProvider") AuthProvider authProvider,
             @Param("username") String username,
             @Param("refreshToken") String refreshToken);
 

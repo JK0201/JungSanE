@@ -6,9 +6,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Getter
 @Table(name = "users")
@@ -33,8 +30,9 @@ public class UserEntity {
     @Column(nullable = false)
     private UserRole role;
 
-    @OneToMany(mappedBy = "refreshToken", orphanRemoval = true)
-    private List<RefreshTokenEntity> refreshTokenList = new ArrayList<>();
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuthProvider authProvider;
 
     public static UserEntity from(User user) {
         UserEntity userEntity = new UserEntity();
@@ -43,6 +41,7 @@ public class UserEntity {
         userEntity.username = user.getUsername();
         userEntity.nickname = user.getNickname();
         userEntity.role = user.getRole();
+        userEntity.authProvider = user.getAuthProvider();
 
         return userEntity;
     }
@@ -54,6 +53,7 @@ public class UserEntity {
                 .username(username)
                 .nickname(nickname)
                 .role(role)
+                .authProvider(authProvider)
                 .build();
     }
 }

@@ -1,6 +1,7 @@
 package com.streaming.settlement.user.repository;
 
 import com.streaming.settlement.user.dto.RefreshToken;
+import com.streaming.settlement.user.entity.AuthProvider;
 import com.streaming.settlement.user.entity.RefreshTokenEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -15,8 +16,8 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     private final RefreshTokenJpaRepository refreshTokenJpaRepository;
 
     @Override
-    public Optional<RefreshToken> findByRefreshTokenAndUsername(String username, String refreshToken) {
-        return refreshTokenJpaRepository.findByRefreshTokenAndUsername(username, refreshToken)
+    public Optional<RefreshToken> findByRefreshTokenFetchUser(AuthProvider authProvider, String username, String refreshToken) {
+        return refreshTokenJpaRepository.findByRefreshTokenFetchUser(authProvider, username, refreshToken)
                 .map(RefreshTokenEntity::toModel);
     }
 

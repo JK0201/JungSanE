@@ -1,10 +1,9 @@
 package com.streaming.settlement.user.config;
 
-import com.streaming.settlement.user.jwt.CustomLogoutFilter;
-import com.streaming.settlement.user.jwt.JwtAuthorizationFilter;
-import com.streaming.settlement.user.jwt.JwtUtil;
-import com.streaming.settlement.user.oauth2.CustomSuccessHandler;
 import com.streaming.settlement.user.repository.RefreshTokenRepository;
+import com.streaming.settlement.user.security.CustomLogoutFilter;
+import com.streaming.settlement.user.security.CustomSuccessHandler;
+import com.streaming.settlement.user.security.JwtAuthorizationFilter;
 import com.streaming.settlement.user.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

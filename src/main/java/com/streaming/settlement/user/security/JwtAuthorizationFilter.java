@@ -1,6 +1,6 @@
-package com.streaming.settlement.user.jwt;
+package com.streaming.settlement.user.security;
 
-import com.streaming.settlement.user.dto.CustomOAuth2User;
+import com.streaming.settlement.user.config.JwtUtil;
 import com.streaming.settlement.user.dto.User;
 import com.streaming.settlement.user.entity.UserRole;
 import io.jsonwebtoken.Claims;
@@ -18,7 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static com.streaming.settlement.user.jwt.JwtUtil.*;
+import static com.streaming.settlement.user.config.JwtUtil.*;
 
 @Slf4j(topic = "JWT 인가 필터")
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package com.streaming.settlement.user.jwt;
+package com.streaming.settlement.user.config;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SecurityException;
@@ -29,6 +29,7 @@ public class JwtUtil {
     public static final String GRANT_TYPE = "grant_type";
     public static final String CLAIM_USERNAME = "username";
     public static final String CLAIM_ROLE = "role";
+    public static final String CLAIM_PROVIDER = "provider";
     public static final String TOKEN_PREFIX = "Bearer ";
     public static final Long ACCESS_TOKEN_EXPIRY_TIME = 600000L; // Access Token 10mins
     public static final Long REFRESH_TOKEN_EXPIRY_TIME = 86400000L; // Refresh Token 24hrs
@@ -40,11 +41,12 @@ public class JwtUtil {
      * @param role     (UserRole)
      * @return JWT Token (String)
      */
-    public String generateToken(String tokenType, String username, String role, Long expireTime) {
+    public String generateToken(String tokenType, String username, String role, String authProvider, Long expireTime) {
         return Jwts.builder()
                 .claim(GRANT_TYPE, tokenType)
                 .claim(CLAIM_USERNAME, username)
                 .claim(CLAIM_ROLE, role)
+                .claim(CLAIM_PROVIDER, authProvider)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expireTime))
                 .signWith(secretKey)

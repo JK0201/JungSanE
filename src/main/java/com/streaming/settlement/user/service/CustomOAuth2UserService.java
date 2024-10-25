@@ -1,7 +1,12 @@
 package com.streaming.settlement.user.service;
 
-import com.streaming.settlement.user.dto.*;
+import com.streaming.settlement.user.dto.GoogleResponse;
+import com.streaming.settlement.user.dto.NaverResponse;
+import com.streaming.settlement.user.dto.OAuth2Response;
+import com.streaming.settlement.user.dto.User;
+import com.streaming.settlement.user.entity.AuthProvider;
 import com.streaming.settlement.user.repository.UserRepository;
+import com.streaming.settlement.user.security.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -40,12 +45,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // Authentication Provider에 넘겨줘야 로그인 진행됨
         // 사용자 고유 아이디값 생성 (Provider + ProviderId)
-        String username = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
-        Optional<User> existUser = userRepository.findByUsername(username);
+        AuthProvider authProvider = AuthProvider.fromProvider(oAuth2Response.getProvider());
+        String username = oAuth2Response.getProvider() + "_" + oAuth2Response.getProviderId();
+        Optional<User> existUser = userRepository.findByAuthProviderAndUsername(authProvider, username);
 
         // 최초 로그인이면 회원가입 후 로그인
         if (existUser.isEmpty()) {
-            User user = User.fromOAuth(username, oAuth2Response);
+            User user = User.fromOAuth(username, oAuth2Response, authProvider);
             user = userRepository.save(user);
             return new CustomOAuth2User(user);
         }

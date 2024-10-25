@@ -1,12 +1,13 @@
 package com.streaming.settlement.user.repository;
 
 import com.streaming.settlement.user.dto.RefreshToken;
+import com.streaming.settlement.user.entity.AuthProvider;
 
 import java.util.Optional;
 
 public interface RefreshTokenRepository {
 
-    Optional<RefreshToken> findByRefreshTokenAndUsername(String username, String refreshToken);
+    Optional<RefreshToken> findByRefreshTokenFetchUser(AuthProvider authProvider, String username, String refreshToken);
 
     void save(RefreshToken newRefreshToken);
 

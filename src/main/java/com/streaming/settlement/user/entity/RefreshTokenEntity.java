@@ -19,7 +19,7 @@ public class RefreshTokenEntity {
     @Column(name = "refresh_token_id")
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 500)
     private String refreshToken;
 
     @Column(nullable = false)

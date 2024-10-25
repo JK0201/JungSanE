@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 public class RefreshToken {
 
     private final Long id;
-    private final String refreshToken;
-    private final LocalDateTime expiryTime;
     private final User user;
+    private String refreshToken;
+    private LocalDateTime expiryTime;
 
     @Builder
     public RefreshToken(Long id, String refreshToken, LocalDateTime expiryTime, User user) {

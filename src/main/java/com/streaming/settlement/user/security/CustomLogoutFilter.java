@@ -1,5 +1,6 @@
-package com.streaming.settlement.user.jwt;
+package com.streaming.settlement.user.security;
 
+import com.streaming.settlement.user.config.JwtUtil;
 import com.streaming.settlement.user.repository.RefreshTokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,15 +10,13 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
-import static com.streaming.settlement.user.jwt.JwtUtil.AUTHORIZATION_HEADER;
+import static com.streaming.settlement.user.config.JwtUtil.AUTHORIZATION_HEADER;
 
-@Slf4j(topic = "로그아웃 필터")
 @RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilterBean {
 
@@ -47,8 +46,6 @@ public class CustomLogoutFilter extends GenericFilterBean {
             filterChain.doFilter(request, response);
             return;
         }
-
-        log.error("여기임");
 
         // Refresh 토큰 삭제 및 쿠키 만료 처리
         refreshTokenRepository.deleteByRefreshToken(refreshToken);
