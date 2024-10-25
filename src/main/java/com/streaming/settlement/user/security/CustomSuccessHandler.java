@@ -6,6 +6,7 @@ import com.streaming.settlement.user.dto.User;
 import com.streaming.settlement.user.entity.AuthProvider;
 import com.streaming.settlement.user.repository.RefreshTokenRepository;
 import com.streaming.settlement.user.repository.UserRepository;
+import com.streaming.settlement.video.exception.ResourceNotFoundException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -59,7 +59,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         // Refresh Token DB 저장
         User user = userRepository.findByAuthProviderAndUsername(authProvider, username)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다. : " + username));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 사용자를 찾을 수 없습니다. : " + username));
         RefreshToken newRefreshToken = RefreshToken
                 .fromCreatedToken(refreshToken, REFRESH_TOKEN_EXPIRY_TIME, user);
         refreshTokenRepository.save(newRefreshToken);

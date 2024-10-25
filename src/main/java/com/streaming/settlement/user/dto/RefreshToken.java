@@ -10,8 +10,8 @@ public class RefreshToken {
 
     private final Long id;
     private final User user;
-    private String refreshToken;
-    private LocalDateTime expiryTime;
+    private final String refreshToken;
+    private final LocalDateTime expiryTime;
 
     @Builder
     public RefreshToken(Long id, String refreshToken, LocalDateTime expiryTime, User user) {

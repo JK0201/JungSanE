@@ -2,6 +2,7 @@ package com.streaming.settlement.user.security;
 
 import com.streaming.settlement.user.config.JwtUtil;
 import com.streaming.settlement.user.dto.User;
+import com.streaming.settlement.user.entity.AuthProvider;
 import com.streaming.settlement.user.entity.UserRole;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -56,6 +57,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         String tokenType = userInfo.get(GRANT_TYPE, String.class);
         String username = userInfo.get(CLAIM_USERNAME, String.class);
         String role = userInfo.get(CLAIM_ROLE, String.class);
+        String authProvider = userInfo.get(CLAIM_PROVIDER, String.class);
 
         // Payload에 Access Token이 아닌 Refresh Token을 넣었을 경우 -> 에러 응답
         if (!tokenType.equals("access")) {
@@ -67,7 +69,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         log.info("요청 유저 = username : {}, role : {}", username, role);
 
         // User 객체에 담아서 커스텀한 OAuth2User에 넘겨줌
-        User user = User.fromToken(username, UserRole.fromAuthority(role));
+        User user = User.fromToken(username, UserRole.fromAuthority(role), AuthProvider.fromProvider(authProvider));
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(user);
 
         // 인증 처리 : Authentication 객체 생성 후, SecurityContextHolder에 인증 정보 저장

@@ -7,9 +7,10 @@ import java.util.Map;
 
 @Getter
 public enum UserRole {
-    
+
     USER("ROLE_USER"),
-    UPLOADER("ROLE_UPLOADER");
+    UPLOADER("ROLE_UPLOADER"),
+    ADMIN("ROLE_ADMIN");
 
     private final String authority;
 

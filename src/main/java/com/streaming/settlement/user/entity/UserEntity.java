@@ -6,6 +6,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Table(name = "users")
@@ -34,6 +36,20 @@ public class UserEntity {
     @Column(nullable = false)
     private AuthProvider authProvider;
 
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+        this.modifiedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.modifiedAt = LocalDateTime.now();
+    }
+
     public static UserEntity from(User user) {
         UserEntity userEntity = new UserEntity();
         userEntity.id = user.getId();
@@ -42,6 +58,8 @@ public class UserEntity {
         userEntity.nickname = user.getNickname();
         userEntity.role = user.getRole();
         userEntity.authProvider = user.getAuthProvider();
+        userEntity.createdAt = user.getCreatedAt();
+        userEntity.modifiedAt = user.getModifiedAt();
 
         return userEntity;
     }
@@ -54,6 +72,8 @@ public class UserEntity {
                 .nickname(nickname)
                 .role(role)
                 .authProvider(authProvider)
+                .createdAt(createdAt)
+                .modifiedAt(modifiedAt)
                 .build();
     }
 }
