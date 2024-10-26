@@ -20,7 +20,7 @@ import java.util.Optional;
 
 import static com.streaming.settlement.user.config.JwtUtil.*;
 
-@Slf4j(topic = "JWT Access Token 재발급")
+@Slf4j(topic = "JWT Token 재발급")
 @RestController
 @RequiredArgsConstructor
 public class ReissueController {
@@ -67,15 +67,15 @@ public class ReissueController {
         log.info("요청 유저 = username : {}, role : {}", username, role);
 
         // Access Token, Refresh Token 생성
-        String accessToken = jwtUtil.generateToken("access", username, role, authProvider, ACCESS_TOKEN_EXPIRY_TIME);
-        String refreshToken = jwtUtil.generateToken("refresh", username, role, authProvider, REFRESH_TOKEN_EXPIRY_TIME);
+        String newAccessToken = jwtUtil.generateToken("access", username, role, authProvider, ACCESS_TOKEN_EXPIRY_TIME);
+        String newRefreshToken = jwtUtil.generateToken("refresh", username, role, authProvider, REFRESH_TOKEN_EXPIRY_TIME);
 
         // 새로 발급 받은 Refresh Token DB에 업데이트 (의존성 최소화를 위해 merge)
-        RefreshToken newRefreshToken = RefreshToken.update(existRefreshToken.get(), refreshToken, REFRESH_TOKEN_EXPIRY_TIME);
-        refreshTokenRepository.save(newRefreshToken);
+        RefreshToken refreshToken = RefreshToken.update(existRefreshToken.get(), newRefreshToken, REFRESH_TOKEN_EXPIRY_TIME);
+        refreshTokenRepository.save(refreshToken);
 
-        response.setHeader(AUTHORIZATION_HEADER, accessToken);
-        response.addCookie(createCookie(refreshToken));
+        response.setHeader(AUTHORIZATION_HEADER, newAccessToken);
+        response.addCookie(createCookie(newRefreshToken));
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

@@ -4,32 +4,32 @@ import com.streaming.settlement.user.dto.User;
 import com.streaming.settlement.user.security.CustomOAuth2User;
 import com.streaming.settlement.video.dto.Video;
 import com.streaming.settlement.video.dto.VideoPublish;
-import com.streaming.settlement.video.repository.VideoCommandRepository;
+import com.streaming.settlement.video.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j(topic = "유저 재생시간")
 @Service
 @RequiredArgsConstructor
 public class VideoCommandService {
 
-    private final VideoCommandRepository videoCommandRepository;
+    private final VideoRepository videoRepository;
     private final PublishService publishService;
 
     /**
      * 영상 업로드
      *
      * @param videoPublish (VideoPublish)
-     * @param authority    (CustomOAuth2User)
+     * @param oAuth2User   (CustomOAuth2User)
      * @return VideoResponse
      */
     @Transactional
-    public Video publish(VideoPublish videoPublish, CustomOAuth2User authority) {
-        User user = publishService.findUser(authority);
-        System.out.println(user.getCreatedAt());
-        System.out.println(user.getModifiedAt());
+    public Video publish(VideoPublish videoPublish, CustomOAuth2User oAuth2User) {
+        User user = publishService.findUploader(oAuth2User);
         Video video = Video.fromPublish(videoPublish, user);
-        video = videoCommandRepository.save(video);
+        video = videoRepository.save(video);
 
         return video;
     }

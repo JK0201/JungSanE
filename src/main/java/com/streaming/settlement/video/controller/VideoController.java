@@ -18,16 +18,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/video")
-public class VideoCommandController {
-
+public class VideoController {
 
     private final VideoCommandService videoCommandService;
 
     @PostMapping("/publish")
     public ResponseEntity<VideoResponse> publish(
             @Valid @RequestBody VideoPublish videoPublish,
-            @AuthenticationPrincipal CustomOAuth2User authority) {
-        Video video = videoCommandService.publish(videoPublish, authority);
+            @AuthenticationPrincipal CustomOAuth2User oAuth2User
+    ) {
+        Video video = videoCommandService.publish(videoPublish, oAuth2User);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(VideoResponse.from(video));

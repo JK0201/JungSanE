@@ -46,4 +46,17 @@ public class Video {
                 .user(user)
                 .build();
     }
+
+    public static Video updateViewCount(Video video) {
+        return Video.builder()
+                .id(video.getId())
+                .title(video.getTitle())
+                .description(video.getDescription())
+                .playbackTime(video.getPlaybackTime())
+                .accumulatedViewCount(video.getAccumulatedViewCount() + 1)
+                .accumulatedPlaybackTime(0L)
+                .status(video.getStatus())
+                .user(video.getUser())
+                .build();
+    }
 }

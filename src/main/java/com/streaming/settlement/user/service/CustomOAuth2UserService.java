@@ -50,13 +50,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         Optional<User> existUser = userRepository.findByAuthProviderAndUsername(authProvider, username);
 
         // 최초 로그인이면 회원가입 후 로그인
-        if (existUser.isEmpty()) {
-            User user = User.fromOAuth(username, oAuth2Response, authProvider);
-            user = userRepository.save(user);
-            return new CustomOAuth2User(user);
-        }
-
         // 이미 가입한 유저라면 Authentication Provider에 해당 유저를 return
-        return new CustomOAuth2User(existUser.get());
+        return new CustomOAuth2User(
+                userRepository.findByAuthProviderAndUsername(authProvider, username)
+                        .orElseGet(() -> {
+                            User newUser = User.fromOAuth(username, oAuth2Response, authProvider);
+                            return userRepository.save(newUser);
+                        })
+        );
     }
 }

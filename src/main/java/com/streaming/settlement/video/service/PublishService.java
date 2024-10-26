@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
-@Slf4j(topic = "영상 업로드 요청")
+@Slf4j(topic = "영상 업로드")
 @Service
 @RequiredArgsConstructor
 public class PublishService {
@@ -21,16 +21,16 @@ public class PublishService {
     /**
      * 영상 업로드 요청 유저 객체 반환(ROLE_UPLOADER)
      *
-     * @param authority (CustomOAuth2User)
+     * @param oAuth2User (CustomOAuth2User)
      * @return User
      */
-    public User findUser(CustomOAuth2User authority) {
-        boolean isUploader = checkPublishPermission(authority);
+    public User findUploader(CustomOAuth2User oAuth2User) {
+        boolean isUploader = hasPublishPermission(oAuth2User);
         if (!isUploader) throw new UnauthorizedAccessException("영상 업로드 권한이 없습니다.");
 
         // 업로드 권한이 있다면 해당 유저 DB에서 조회
-        String username = authority.getUsername();
-        AuthProvider authProvider = authority.getAuthProvider();
+        String username = oAuth2User.getUsername();
+        AuthProvider authProvider = oAuth2User.getAuthProvider();
 
         log.info("요청 유저 = username : {}, provider : {}", username, authProvider);
 
@@ -41,11 +41,11 @@ public class PublishService {
     /**
      * 영상 업로드 요청 유저 권한 확인
      *
-     * @param authority (CustomOAuth2User)
+     * @param oAuth2User (CustomOAuth2User)
      * @return boolean
      */
-    private boolean checkPublishPermission(CustomOAuth2User authority) {
-        return authority.getAuthorities()
+    private boolean hasPublishPermission(CustomOAuth2User oAuth2User) {
+        return oAuth2User.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(auth -> auth.equals("ROLE_UPLOADER") || auth.equals("ROLE_ADMIN"));

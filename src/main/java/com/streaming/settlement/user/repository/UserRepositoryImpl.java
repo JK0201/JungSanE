@@ -16,7 +16,8 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByAuthProviderAndUsername(AuthProvider authProvider, String username) {
-        return userJpaRepository.findByAuthProviderAndUsername(authProvider, username).map(UserEntity::toModel);
+        return userJpaRepository.findByAuthProviderAndUsername(authProvider, username)
+                .map(UserEntity::toModel);
     }
 
     @Override

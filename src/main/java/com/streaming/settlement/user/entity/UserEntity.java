@@ -36,7 +36,9 @@ public class UserEntity {
     @Column(nullable = false)
     private AuthProvider authProvider;
 
+    @Column(updatable = false)
     private LocalDateTime createdAt;
+
     private LocalDateTime modifiedAt;
 
     @PrePersist

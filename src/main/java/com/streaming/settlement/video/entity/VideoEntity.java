@@ -43,7 +43,9 @@ public class VideoEntity {
     @JoinColumn(name = "user_id")
     private UserEntity userEntity;
 
+    @Column(updatable = false)
     private LocalDateTime createdAt;
+
     private LocalDateTime modifiedAt;
 
     @PrePersist
@@ -73,6 +75,21 @@ public class VideoEntity {
         return videoEntity;
     }
 
+    public static VideoEntity fromPlayback(Video video) {
+        VideoEntity videoEntity = new VideoEntity();
+        videoEntity.id = video.getId();
+        videoEntity.title = video.getTitle();
+        videoEntity.description = video.getDescription();
+        videoEntity.playbackTime = video.getPlaybackTime();
+        videoEntity.accumulatedViewCount = video.getAccumulatedViewCount();
+        videoEntity.accumulatedPlaybackTime = video.getAccumulatedPlaybackTime();
+        videoEntity.status = video.getStatus();
+        videoEntity.createdAt = video.getCreatedAt();
+        videoEntity.modifiedAt = video.getModifiedAt();
+
+        return videoEntity;
+    }
+
     public Video toModel() {
         return Video.builder()
                 .id(id)
@@ -82,7 +99,6 @@ public class VideoEntity {
                 .accumulatedViewCount(accumulatedViewCount)
                 .accumulatedPlaybackTime(accumulatedPlaybackTime)
                 .status(status)
-                .user(userEntity.toModel())
                 .createdAt(createdAt)
                 .modifiedAt(modifiedAt)
                 .build();
