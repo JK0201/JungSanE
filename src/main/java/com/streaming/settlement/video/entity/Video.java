@@ -53,7 +53,11 @@ public class Video extends Timestamped {
         return video;
     }
 
-    public void increaseAccumulatedViewCount() {
+    public void addAccumulatedViewCount() {
         this.accumulatedViewCount++;
+    }
+
+    public void addAccumulatedPlaybackTime(Long playedTime) {
+        this.accumulatedPlaybackTime += playedTime;
     }
 }

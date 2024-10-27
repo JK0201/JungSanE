@@ -30,18 +30,22 @@ public class Playback extends Timestamped {
     @JoinColumn(name = "video_id")
     private Video video;
 
-    public static Playback createUserPlayback(User user, Video video, long lastPlayTime) {
+    public static Playback createUserPlayback(User user, Video video, Long lastPlayTime) {
         Playback playback = new Playback();
         playback.user = user;
         playback.video = video;
         playback.lastPlayTime = lastPlayTime;
-        playback.video.increaseAccumulatedViewCount();
+        playback.video.addAccumulatedViewCount();
         return playback;
     }
 
-    public void updateUserPlayTime() {
+    public void updateStartPosition() {
         if (this.lastPlayTime >= video.getPlaybackTime()) {
             this.lastPlayTime = 0L;
         }
+    }
+
+    public void update(Long currentPosition) {
+        this.lastPlayTime = currentPosition;
     }
 }

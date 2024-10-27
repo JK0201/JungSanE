@@ -1,6 +1,7 @@
 package com.streaming.settlement.playback.service;
 
 import com.streaming.settlement.playback.dto.PlaybackResponse;
+import com.streaming.settlement.playback.dto.StopRequest;
 import com.streaming.settlement.playback.entity.Playback;
 import com.streaming.settlement.playback.repository.PlaybackRepository;
 import com.streaming.settlement.user.security.CustomOAuth2User;
@@ -24,7 +25,7 @@ public class PlaybackCommandService {
      */
     @Transactional
     public PlaybackResponse start(Long videoId, CustomOAuth2User oAuth2User) {
-        Playback playback = userPlaybackService.getUserPlayback(videoId, oAuth2User);
+        Playback playback = userPlaybackService.startUserPlayback(videoId, oAuth2User);
         return PlaybackResponse.from(playback);
     }
 
@@ -36,7 +37,8 @@ public class PlaybackCommandService {
      * @return PlaybackResponse
      */
     @Transactional
-    public PlaybackResponse stop(Long videoId, CustomOAuth2User oAuth2User) {
+    public PlaybackResponse stop(Long videoId, StopRequest stopRequest, CustomOAuth2User oAuth2User) {
+        Playback playback = userPlaybackService.stopUserPlayback(videoId, stopRequest, oAuth2User);
         return null;
     }
 }

@@ -7,11 +7,9 @@ import com.streaming.settlement.video.dto.VideoResponse;
 import com.streaming.settlement.video.entity.Video;
 import com.streaming.settlement.video.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Slf4j(topic = "유저 재생시간")
 @Service
 @RequiredArgsConstructor
 public class VideoCommandService {

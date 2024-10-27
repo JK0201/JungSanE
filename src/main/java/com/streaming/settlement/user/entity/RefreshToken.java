@@ -28,7 +28,7 @@ public class RefreshToken {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public static RefreshToken fromCreatedToken(String createdRefreshToken, long expiryTime, User user) {
+    public static RefreshToken fromCreatedToken(String createdRefreshToken, Long expiryTime, User user) {
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.refreshToken = createdRefreshToken;
         refreshToken.expiryTime = LocalDateTime.now().plusSeconds(expiryTime / 1000);
@@ -36,7 +36,7 @@ public class RefreshToken {
         return refreshToken;
     }
 
-    public void update(String newRefreshToken, long expiryTime) {
+    public void update(String newRefreshToken, Long expiryTime) {
         this.refreshToken = newRefreshToken;
         this.expiryTime = LocalDateTime.now().plusSeconds(expiryTime / 1000);
     }

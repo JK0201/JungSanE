@@ -1,5 +1,6 @@
 package com.streaming.settlement.playback.service;
 
+import com.streaming.settlement.playback.dto.StopRequest;
 import com.streaming.settlement.playback.entity.Playback;
 import com.streaming.settlement.playback.repository.PlaybackRepository;
 import com.streaming.settlement.user.entity.AuthProvider;
@@ -35,7 +36,7 @@ public class UserPlaybackService {
      * @param oAuth2User (CustomOAuth2User)
      * @return Playback
      */
-    public Playback getUserPlayback(Long videoId, CustomOAuth2User oAuth2User) {
+    public Playback startUserPlayback(Long videoId, CustomOAuth2User oAuth2User) {
         String username = oAuth2User.getUsername();
         AuthProvider authProvider = oAuth2User.getAuthProvider();
 
@@ -44,18 +45,50 @@ public class UserPlaybackService {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 사용자를 찾을 수 없습니다. : " + username));
 
         // Fetch Join을 사용하여 유저 재생 시간과 해당 영상을 가져옴
-        Optional<Playback> existingPlayback = playbackRepository.findByUserIdAndVideoIdFetchVideo(user.getId(), videoId);
-        if (existingPlayback.isPresent()) {
-            Playback playback = existingPlayback.get();
-            playback.updateUserPlayTime();
-            playback.getVideo().increaseAccumulatedViewCount();
+        Optional<Playback> existPlayback = playbackRepository.findByUserIdAndVideoIdFetchVideo(user.getId(), videoId);
+        if (existPlayback.isPresent()) {
+            Playback playback = existPlayback.get();
+            playback.updateStartPosition();
+            playback.getVideo().addAccumulatedViewCount();
             return playback;
         }
 
         // 없을 경우 초기화 및 재생 시간 저장
         Video video = videoRepository.findByIdAndStatus(videoId, VideoStatus.ACTIVE)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 영상을 찾을 수 없습니다"));
+                .orElseThrow(() -> new ResourceNotFoundException("해당 영상을 찾을 수 없습니다. : video_id : " + videoId));
         Playback playback = Playback.createUserPlayback(user, video, 0L);
         return playbackRepository.save(playback);
+    }
+
+    public Playback stopUserPlayback(Long videoId, StopRequest stopRequest, CustomOAuth2User oAuth2User) {
+        String username = oAuth2User.getUsername();
+        AuthProvider authProvider = oAuth2User.getAuthProvider();
+
+        // DB에서 유저 조회
+        User user = userRepository.findByAuthProviderAndUsername(authProvider, username)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 사용자를 찾을 수 없습니다. : " + username));
+
+        // Fetch Join을 사용하여 유저 재생 시간과 해당 영상을 가져옴
+        Playback playback = playbackRepository.findByUserIdAndVideoIdFetchVideo(user.getId(), videoId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 재생 기록을 찾을 수 없습니다. : " +
+                        "video_id : " + videoId + " / username : " + username));
+
+        Long currentPosition = stopRequest.getCurrentPosition();
+        Long previousPosition = playback.getLastPlayTime();
+        Long playbackTime = playback.getVideo().getPlaybackTime();
+
+        if (currentPosition >= playbackTime) currentPosition = playbackTime;
+        Long playedTime = currentPosition - previousPosition;
+
+        if (playedTime > 0) {
+            playback.getVideo().addAccumulatedPlaybackTime(playedTime);
+            playback.update(currentPosition);
+        }
+
+        System.out.println(currentPosition);
+        System.out.println(previousPosition);
+        System.out.println(playback.getVideo().getPlaybackTime());
+
+        return null;
     }
 }
