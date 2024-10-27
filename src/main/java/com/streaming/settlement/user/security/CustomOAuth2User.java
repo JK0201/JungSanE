@@ -1,7 +1,7 @@
 package com.streaming.settlement.user.security;
 
-import com.streaming.settlement.user.dto.User;
 import com.streaming.settlement.user.entity.AuthProvider;
+import com.streaming.settlement.user.entity.User;
 import com.streaming.settlement.user.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

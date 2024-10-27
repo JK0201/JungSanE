@@ -1,6 +1,5 @@
 package com.streaming.settlement.playback.controller;
 
-import com.streaming.settlement.playback.dto.Playback;
 import com.streaming.settlement.playback.dto.PlaybackResponse;
 import com.streaming.settlement.playback.service.PlaybackCommandService;
 import com.streaming.settlement.user.security.CustomOAuth2User;
@@ -25,20 +24,20 @@ public class PlaybackController {
             @PathVariable("video_id") Long videoId,
             @AuthenticationPrincipal CustomOAuth2User oAuth2User
     ) {
-        Playback playback = playbackCommandService.start(videoId, oAuth2User);
+        PlaybackResponse playbackResponse = playbackCommandService.start(videoId, oAuth2User);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(PlaybackResponse.from(playback));
+                .body(playbackResponse);
     }
 
     @PostMapping("/{video_id}/stop")
-    public ResponseEntity<Void> stop(
+    public ResponseEntity<PlaybackResponse> stop(
             @PathVariable("video_id") Long videoId,
             @AuthenticationPrincipal CustomOAuth2User user
     ) {
-        Playback playback = playbackCommandService.stop(videoId, user);
+        PlaybackResponse playbackResponse = playbackCommandService.stop(videoId, user);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .build();
+                .body(playbackResponse);
     }
 }

@@ -1,18 +1,20 @@
 package com.streaming.settlement.playback.service;
 
-import com.streaming.settlement.playback.dto.Playback;
+import com.streaming.settlement.playback.entity.Playback;
 import com.streaming.settlement.playback.repository.PlaybackRepository;
-import com.streaming.settlement.user.dto.User;
 import com.streaming.settlement.user.entity.AuthProvider;
+import com.streaming.settlement.user.entity.User;
 import com.streaming.settlement.user.repository.UserRepository;
 import com.streaming.settlement.user.security.CustomOAuth2User;
-import com.streaming.settlement.video.dto.Video;
+import com.streaming.settlement.video.entity.Video;
 import com.streaming.settlement.video.entity.VideoStatus;
 import com.streaming.settlement.video.exception.ResourceNotFoundException;
 import com.streaming.settlement.video.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Slf4j(topic = "유저 영상 시청")
 @Service
@@ -23,19 +25,37 @@ public class UserPlaybackService {
     private final PlaybackRepository playbackRepository;
     private final VideoRepository videoRepository;
 
+    /**
+     * 요청 유저의 해당 영상에 대한 재생 시간 조회 / 동영상 조회수++
+     * 없을 경우 -> 초기화 및 재생 시간 insert
+     * 있을 경우 -> 조회된 값 return
+     * FIXME 쿼리 개선 요망
+     *
+     * @param videoId    (Long)
+     * @param oAuth2User (CustomOAuth2User)
+     * @return Playback
+     */
     public Playback getUserPlayback(Long videoId, CustomOAuth2User oAuth2User) {
         String username = oAuth2User.getUsername();
         AuthProvider authProvider = oAuth2User.getAuthProvider();
 
+        // DB에서 유저 조회
         User user = userRepository.findByAuthProviderAndUsername(authProvider, username)
                 .orElseThrow(() -> new ResourceNotFoundException("해당 사용자를 찾을 수 없습니다. : " + username));
-        Video video = Video.updateViewCount(
-                videoRepository.findByIdAndStatus(videoId, VideoStatus.ACTIVE)
-                        .orElseThrow(() -> new ResourceNotFoundException("해당 영상을 찾을 수 없습니다. : video_id " + videoId)));
 
-        log.info("요청 영상 = video_id : {}, title : {}", video.getId(), video.getTitle());
-        
-        return playbackRepository.findByUserIdAndVideoId(user.getId(), videoId)
-                .orElseGet(() -> Playback.from(user, video, 0L));
+        // Fetch Join을 사용하여 유저 재생 시간과 해당 영상을 가져옴
+        Optional<Playback> existingPlayback = playbackRepository.findByUserIdAndVideoIdFetchVideo(user.getId(), videoId);
+        if (existingPlayback.isPresent()) {
+            Playback playback = existingPlayback.get();
+            playback.updateUserPlayTime();
+            playback.getVideo().increaseAccumulatedViewCount();
+            return playback;
+        }
+
+        // 없을 경우 초기화 및 재생 시간 저장
+        Video video = videoRepository.findByIdAndStatus(videoId, VideoStatus.ACTIVE)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 영상을 찾을 수 없습니다"));
+        Playback playback = Playback.createUserPlayback(user, video, 0L);
+        return playbackRepository.save(playback);
     }
 }

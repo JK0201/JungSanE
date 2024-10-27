@@ -32,8 +32,8 @@ public class JwtUtil {
     public static final String CLAIM_PROVIDER = "provider";
     public static final String TOKEN_PREFIX = "Bearer ";
     // FIXME 토큰 시간 변경 요망
-    public static final Long ACCESS_TOKEN_EXPIRY_TIME = 864000000L; // Access Token 10mins
-    public static final Long REFRESH_TOKEN_EXPIRY_TIME = 864000000L; // Refresh Token 24hrs
+    public static final long ACCESS_TOKEN_EXPIRY_TIME = 864000000L; // Access Token 10mins
+    public static final long REFRESH_TOKEN_EXPIRY_TIME = 864000000L; // Refresh Token 24hrs
 
     /**
      * 토큰 생성

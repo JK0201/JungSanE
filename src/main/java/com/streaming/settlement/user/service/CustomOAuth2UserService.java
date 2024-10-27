@@ -3,8 +3,8 @@ package com.streaming.settlement.user.service;
 import com.streaming.settlement.user.dto.GoogleResponse;
 import com.streaming.settlement.user.dto.NaverResponse;
 import com.streaming.settlement.user.dto.OAuth2Response;
-import com.streaming.settlement.user.dto.User;
 import com.streaming.settlement.user.entity.AuthProvider;
+import com.streaming.settlement.user.entity.User;
 import com.streaming.settlement.user.repository.UserRepository;
 import com.streaming.settlement.user.security.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +14,6 @@ import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Slf4j(topic = "OAuth2 유저 정보")
 @Service
@@ -47,7 +45,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 사용자 고유 아이디값 생성 (Provider + ProviderId)
         AuthProvider authProvider = AuthProvider.fromProvider(oAuth2Response.getProvider());
         String username = oAuth2Response.getProvider() + "_" + oAuth2Response.getProviderId();
-        Optional<User> existUser = userRepository.findByAuthProviderAndUsername(authProvider, username);
 
         // 최초 로그인이면 회원가입 후 로그인
         // 이미 가입한 유저라면 Authentication Provider에 해당 유저를 return

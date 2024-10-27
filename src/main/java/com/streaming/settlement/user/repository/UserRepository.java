@@ -1,7 +1,7 @@
 package com.streaming.settlement.user.repository;
 
-import com.streaming.settlement.user.dto.User;
 import com.streaming.settlement.user.entity.AuthProvider;
+import com.streaming.settlement.user.entity.User;
 
 import java.util.Optional;
 

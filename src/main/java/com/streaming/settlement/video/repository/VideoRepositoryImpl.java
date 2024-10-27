@@ -1,7 +1,6 @@
 package com.streaming.settlement.video.repository;
 
-import com.streaming.settlement.video.dto.Video;
-import com.streaming.settlement.video.entity.VideoEntity;
+import com.streaming.settlement.video.entity.Video;
 import com.streaming.settlement.video.entity.VideoStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -16,11 +15,11 @@ public class VideoRepositoryImpl implements VideoRepository {
 
     @Override
     public Video save(Video video) {
-        return videoJpaRepository.save(VideoEntity.from(video)).toModel();
+        return videoJpaRepository.save(video);
     }
 
     @Override
     public Optional<Video> findByIdAndStatus(Long videoId, VideoStatus videoStatus) {
-        return videoJpaRepository.findByIdAndStatus(videoId, videoStatus).map(VideoEntity::toModel);
+        return videoJpaRepository.findByIdAndStatus(videoId, videoStatus);
     }
 }

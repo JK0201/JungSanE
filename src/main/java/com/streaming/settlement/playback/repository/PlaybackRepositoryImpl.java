@@ -1,7 +1,6 @@
 package com.streaming.settlement.playback.repository;
 
-import com.streaming.settlement.playback.dto.Playback;
-import com.streaming.settlement.playback.entity.PlaybackEntity;
+import com.streaming.settlement.playback.entity.Playback;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -14,13 +13,12 @@ public class PlaybackRepositoryImpl implements PlaybackRepository {
     private final PlaybackJpaRepository playbackJpaRepository;
 
     @Override
-    public Optional<Playback> findByUserIdAndVideoId(Long userId, Long videoId) {
-        return playbackJpaRepository.findByUserIdAndVideoId(userId, videoId)
-                .map(PlaybackEntity::toModel);
+    public Optional<Playback> findByUserIdAndVideoIdFetchVideo(Long userId, Long videoId) {
+        return playbackJpaRepository.findByUserIdAndVideoIdFetchVideo(userId, videoId);
     }
 
     @Override
     public Playback save(Playback playback) {
-        return playbackJpaRepository.save(PlaybackEntity.from(playback)).toModel();
+        return playbackJpaRepository.save(playback);
     }
 }

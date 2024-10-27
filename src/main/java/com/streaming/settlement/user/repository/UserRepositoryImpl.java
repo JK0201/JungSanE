@@ -1,8 +1,7 @@
 package com.streaming.settlement.user.repository;
 
-import com.streaming.settlement.user.dto.User;
 import com.streaming.settlement.user.entity.AuthProvider;
-import com.streaming.settlement.user.entity.UserEntity;
+import com.streaming.settlement.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -16,12 +15,11 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByAuthProviderAndUsername(AuthProvider authProvider, String username) {
-        return userJpaRepository.findByAuthProviderAndUsername(authProvider, username)
-                .map(UserEntity::toModel);
+        return userJpaRepository.findByAuthProviderAndUsername(authProvider, username);
     }
 
     @Override
     public User save(User user) {
-        return userJpaRepository.save(UserEntity.from(user)).toModel();
+        return userJpaRepository.save(user);
     }
 }

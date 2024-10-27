@@ -1,6 +1,6 @@
 package com.streaming.settlement.advertisement.entity;
 
-import com.streaming.settlement.video.entity.VideoEntity;
+import com.streaming.settlement.video.entity.Video;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "videoAdvertisements")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class VideoAdvertisementEntity {
+public class VideoAdvertisement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,5 +25,5 @@ public class VideoAdvertisementEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "video_id")
-    private VideoEntity videoEntity;
+    private Video video;
 }

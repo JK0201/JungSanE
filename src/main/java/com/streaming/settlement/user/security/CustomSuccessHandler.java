@@ -1,9 +1,9 @@
 package com.streaming.settlement.user.security;
 
 import com.streaming.settlement.user.config.JwtUtil;
-import com.streaming.settlement.user.dto.RefreshToken;
-import com.streaming.settlement.user.dto.User;
 import com.streaming.settlement.user.entity.AuthProvider;
+import com.streaming.settlement.user.entity.RefreshToken;
+import com.streaming.settlement.user.entity.User;
 import com.streaming.settlement.user.repository.RefreshTokenRepository;
 import com.streaming.settlement.user.repository.UserRepository;
 import com.streaming.settlement.video.exception.ResourceNotFoundException;

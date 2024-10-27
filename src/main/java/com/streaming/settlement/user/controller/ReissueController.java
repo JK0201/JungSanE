@@ -1,8 +1,8 @@
 package com.streaming.settlement.user.controller;
 
 import com.streaming.settlement.user.config.JwtUtil;
-import com.streaming.settlement.user.dto.RefreshToken;
 import com.streaming.settlement.user.entity.AuthProvider;
+import com.streaming.settlement.user.entity.RefreshToken;
 import com.streaming.settlement.user.repository.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.Cookie;
@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +30,7 @@ public class ReissueController {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @PostMapping("/reissue")
+    @Transactional
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         // Refresh Token 쿠키에서 가져오기
         String authorization = jwtUtil.getRefreshTokenFromCookie(request);
@@ -70,9 +72,9 @@ public class ReissueController {
         String newAccessToken = jwtUtil.generateToken("access", username, role, authProvider, ACCESS_TOKEN_EXPIRY_TIME);
         String newRefreshToken = jwtUtil.generateToken("refresh", username, role, authProvider, REFRESH_TOKEN_EXPIRY_TIME);
 
-        // 새로 발급 받은 Refresh Token DB에 업데이트 (의존성 최소화를 위해 merge)
-        RefreshToken refreshToken = RefreshToken.update(existRefreshToken.get(), newRefreshToken, REFRESH_TOKEN_EXPIRY_TIME);
-        refreshTokenRepository.save(refreshToken);
+        // 새로 발급 받은 Refresh Token DB에 업데이트 (Dirty Checking)
+        existRefreshToken.get().update(newRefreshToken, REFRESH_TOKEN_EXPIRY_TIME);
+//        refreshTokenRepository.save(refreshToken);
 
         response.setHeader(AUTHORIZATION_HEADER, newAccessToken);
         response.addCookie(createCookie(newRefreshToken));

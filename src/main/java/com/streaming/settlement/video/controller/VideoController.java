@@ -1,7 +1,6 @@
 package com.streaming.settlement.video.controller;
 
 import com.streaming.settlement.user.security.CustomOAuth2User;
-import com.streaming.settlement.video.dto.Video;
 import com.streaming.settlement.video.dto.VideoPublish;
 import com.streaming.settlement.video.dto.VideoResponse;
 import com.streaming.settlement.video.service.VideoCommandService;
@@ -27,9 +26,9 @@ public class VideoController {
             @Valid @RequestBody VideoPublish videoPublish,
             @AuthenticationPrincipal CustomOAuth2User oAuth2User
     ) {
-        Video video = videoCommandService.publish(videoPublish, oAuth2User);
+        VideoResponse videoResponse = videoCommandService.publish(videoPublish, oAuth2User);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(VideoResponse.from(video));
+                .body(videoResponse);
     }
 }

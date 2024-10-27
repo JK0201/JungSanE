@@ -1,8 +1,8 @@
 package com.streaming.settlement.user.security;
 
 import com.streaming.settlement.user.config.JwtUtil;
-import com.streaming.settlement.user.dto.User;
 import com.streaming.settlement.user.entity.AuthProvider;
+import com.streaming.settlement.user.entity.User;
 import com.streaming.settlement.user.entity.UserRole;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -47,6 +47,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         // 토큰이 유효하지 않은 경우 -> 에러 응답
         if (!jwtUtil.validateToken(authorization)) {
+            response.setContentType("application/json; charset=UTF-8");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("유효하지 않은 토큰 입니다.");
             return;
@@ -61,6 +62,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         // Payload에 Access Token이 아닌 Refresh Token을 넣었을 경우 -> 에러 응답
         if (!tokenType.equals("access")) {
+            response.setContentType("application/json; charset=UTF-8");
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("유효하지 않은 토큰 입니다.");
             return;

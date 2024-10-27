@@ -1,9 +1,10 @@
 package com.streaming.settlement.video.service;
 
-import com.streaming.settlement.user.dto.User;
+import com.streaming.settlement.user.entity.User;
 import com.streaming.settlement.user.security.CustomOAuth2User;
-import com.streaming.settlement.video.dto.Video;
 import com.streaming.settlement.video.dto.VideoPublish;
+import com.streaming.settlement.video.dto.VideoResponse;
+import com.streaming.settlement.video.entity.Video;
 import com.streaming.settlement.video.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +27,11 @@ public class VideoCommandService {
      * @return VideoResponse
      */
     @Transactional
-    public Video publish(VideoPublish videoPublish, CustomOAuth2User oAuth2User) {
+    public VideoResponse publish(VideoPublish videoPublish, CustomOAuth2User oAuth2User) {
         User user = publishService.findUploader(oAuth2User);
         Video video = Video.fromPublish(videoPublish, user);
         video = videoRepository.save(video);
 
-        return video;
+        return VideoResponse.from(video);
     }
 }

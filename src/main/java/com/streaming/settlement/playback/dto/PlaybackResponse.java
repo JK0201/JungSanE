@@ -1,7 +1,8 @@
 package com.streaming.settlement.playback.dto;
 
-import com.streaming.settlement.user.dto.User;
-import com.streaming.settlement.video.dto.Video;
+import com.streaming.settlement.playback.entity.Playback;
+import com.streaming.settlement.user.entity.User;
+import com.streaming.settlement.video.entity.Video;
 import lombok.Builder;
 import lombok.Getter;
 

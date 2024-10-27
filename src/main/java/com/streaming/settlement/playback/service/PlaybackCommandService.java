@@ -1,6 +1,7 @@
 package com.streaming.settlement.playback.service;
 
-import com.streaming.settlement.playback.dto.Playback;
+import com.streaming.settlement.playback.dto.PlaybackResponse;
+import com.streaming.settlement.playback.entity.Playback;
 import com.streaming.settlement.playback.repository.PlaybackRepository;
 import com.streaming.settlement.user.security.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
@@ -14,14 +15,28 @@ public class PlaybackCommandService {
     private final UserPlaybackService userPlaybackService;
     private final PlaybackRepository playbackRepository;
 
+    /**
+     * 해당 영상에 대한 유저 재생 요청
+     *
+     * @param videoId    (Long)
+     * @param oAuth2User (CustomOAuth2User)
+     * @return PlaybackResponse
+     */
     @Transactional
-    public Playback start(Long videoId, CustomOAuth2User oAuth2User) {
+    public PlaybackResponse start(Long videoId, CustomOAuth2User oAuth2User) {
         Playback playback = userPlaybackService.getUserPlayback(videoId, oAuth2User);
-        return playbackRepository.save(playback);
+        return PlaybackResponse.from(playback);
     }
 
+    /**
+     * 해당 영상에 대한 유저 정지 요청
+     *
+     * @param videoId    (Long)
+     * @param oAuth2User (CustomOAuth2User)
+     * @return PlaybackResponse
+     */
     @Transactional
-    public Playback stop(Long videoId, CustomOAuth2User oAuth2User) {
+    public PlaybackResponse stop(Long videoId, CustomOAuth2User oAuth2User) {
         return null;
     }
 }

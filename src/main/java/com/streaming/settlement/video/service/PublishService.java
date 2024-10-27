@@ -1,7 +1,7 @@
 package com.streaming.settlement.video.service;
 
-import com.streaming.settlement.user.dto.User;
 import com.streaming.settlement.user.entity.AuthProvider;
+import com.streaming.settlement.user.entity.User;
 import com.streaming.settlement.user.repository.UserRepository;
 import com.streaming.settlement.user.security.CustomOAuth2User;
 import com.streaming.settlement.video.exception.ResourceNotFoundException;
