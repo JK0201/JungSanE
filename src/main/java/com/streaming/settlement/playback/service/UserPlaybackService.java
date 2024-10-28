@@ -73,22 +73,21 @@ public class UserPlaybackService {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 재생 기록을 찾을 수 없습니다. : " +
                         "video_id : " + videoId + " / username : " + username));
 
+        // 영상 시청 시간 계산 로직
         Long currentPosition = stopRequest.getCurrentPosition();
         Long previousPosition = playback.getLastPlayTime();
         Long playbackTime = playback.getVideo().getPlaybackTime();
 
+        // 영상 길이보다 길게 들어올 경우를 대비
         if (currentPosition >= playbackTime) currentPosition = playbackTime;
-        Long playedTime = currentPosition - previousPosition;
 
+        // 영상 누적 시간, 유저 재생 시간을 업데이트 (Dirty Checking)
+        Long playedTime = currentPosition - previousPosition;
         if (playedTime > 0) {
             playback.getVideo().addAccumulatedPlaybackTime(playedTime);
             playback.update(currentPosition);
         }
 
-        System.out.println(currentPosition);
-        System.out.println(previousPosition);
-        System.out.println(playback.getVideo().getPlaybackTime());
-
-        return null;
+        return playback;
     }
 }

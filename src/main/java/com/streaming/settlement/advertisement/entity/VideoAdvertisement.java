@@ -26,4 +26,12 @@ public class VideoAdvertisement {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "video_id")
     private Video video;
+
+    public static VideoAdvertisement fromVideo(Video video, Long advertisementTime) {
+        VideoAdvertisement videoAdvertisement = new VideoAdvertisement();
+        videoAdvertisement.advertisementTime = advertisementTime;
+        videoAdvertisement.accumulatedViewCount = 0L;
+        videoAdvertisement.video = video;
+        return videoAdvertisement;
+    }
 }

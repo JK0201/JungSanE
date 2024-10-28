@@ -39,6 +39,6 @@ public class PlaybackCommandService {
     @Transactional
     public PlaybackResponse stop(Long videoId, StopRequest stopRequest, CustomOAuth2User oAuth2User) {
         Playback playback = userPlaybackService.stopUserPlayback(videoId, stopRequest, oAuth2User);
-        return null;
+        return PlaybackResponse.from(playback);
     }
 }
