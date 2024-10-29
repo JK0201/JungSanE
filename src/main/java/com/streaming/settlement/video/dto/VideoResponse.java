@@ -1,6 +1,5 @@
 package com.streaming.settlement.video.dto;
 
-import com.streaming.settlement.user.entity.User;
 import com.streaming.settlement.video.entity.Video;
 import com.streaming.settlement.video.entity.VideoStatus;
 import lombok.Builder;
@@ -12,16 +11,17 @@ import java.time.LocalDateTime;
 @Builder
 public class VideoResponse {
 
-    private Long id;
-    private String title;
-    private String description;
-    private Long playbackTime;
-    private Long accumulatedViewCount;
-    private Long accumulatedPlaybackTime;
-    private VideoStatus status;
-    private User user;
-    private LocalDateTime createdAt;
-    private LocalDateTime modifiedAt;
+    private final Long id;
+    private final String title;
+    private final String description;
+    private final Long playbackTime;
+    private final Long accumulatedViewCount;
+    private final Long accumulatedPlaybackTime;
+    private final VideoStatus status;
+    //    private final User user;
+    //    private final List<Test> videoAdvertisementList;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime modifiedAt;
 
     public static VideoResponse from(Video video) {
         return VideoResponse.builder()
@@ -32,7 +32,12 @@ public class VideoResponse {
                 .accumulatedViewCount(video.getAccumulatedViewCount())
                 .accumulatedPlaybackTime(video.getAccumulatedPlaybackTime())
                 .status(video.getStatus())
-                .user(video.getUser())
+//                .user(video.getUser())
+//                .videoAdvertisementList(
+//                        video.getVideoAdvertisementList()
+//                                .stream()
+//                                .map(Test::from)
+//                                .toList())
                 .createdAt(video.getCreatedAt())
                 .modifiedAt(video.getModifiedAt())
                 .build();

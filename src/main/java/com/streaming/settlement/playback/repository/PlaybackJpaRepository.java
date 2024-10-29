@@ -10,10 +10,11 @@ import java.util.Optional;
 public interface PlaybackJpaRepository extends JpaRepository<Playback, Long> {
 
     @Query("select p from Playback p " +
-            "join fetch p.video v " +
             "where p.user.id = :userId " +
-            "and p.video.id = :videoId")
-    Optional<Playback> findByUserIdAndVideoIdFetchVideo(
+            "and p.video.id = :videoId " +
+            "order by p.createdAt " +
+            "desc limit 1")
+    Optional<Playback> findByUserIdAndVideoId(
             @Param("userId") Long userId,
             @Param("videoId") Long videoId);
 }

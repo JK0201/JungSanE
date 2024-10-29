@@ -29,7 +29,6 @@ public class VideoCommandService {
         User user = publishService.findUploader(oAuth2User);
         Video video = Video.fromPublish(videoPublish, user);
         video = videoRepository.save(video);
-
         return VideoResponse.from(video);
     }
 }

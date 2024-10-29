@@ -3,7 +3,6 @@ package com.streaming.settlement.playback.service;
 import com.streaming.settlement.playback.dto.PlaybackResponse;
 import com.streaming.settlement.playback.dto.StopRequest;
 import com.streaming.settlement.playback.entity.Playback;
-import com.streaming.settlement.playback.repository.PlaybackRepository;
 import com.streaming.settlement.user.security.CustomOAuth2User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class PlaybackCommandService {
 
     private final UserPlaybackService userPlaybackService;
-    private final PlaybackRepository playbackRepository;
 
     /**
      * 해당 영상에 대한 유저 재생 요청
@@ -34,7 +32,6 @@ public class PlaybackCommandService {
      *
      * @param videoId    (Long)
      * @param oAuth2User (CustomOAuth2User)
-     * @return PlaybackResponse
      */
     @Transactional
     public PlaybackResponse stop(Long videoId, StopRequest stopRequest, CustomOAuth2User oAuth2User) {

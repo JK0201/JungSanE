@@ -3,7 +3,6 @@ package com.streaming.settlement.playback.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
 import lombok.Getter;
 
 @Getter
@@ -13,7 +12,6 @@ public class StopRequest {
     @Min(value = 0, message = "재생 시간은 0초 이상이어야 합니다.")
     private final Long currentPosition;
 
-    @Builder
     public StopRequest(@JsonProperty(value = "current_position") Long currentPosition) {
         this.currentPosition = currentPosition;
     }

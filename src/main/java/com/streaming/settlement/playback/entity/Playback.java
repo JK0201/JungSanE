@@ -20,7 +20,13 @@ public class Playback extends Timestamped {
     private Long id;
 
     @Column(nullable = false)
-    private Long lastPlayTime;
+    private Long videoPlayedTime;
+
+    @Column(nullable = false)
+    private Long lastPlayPosition;
+
+    @Column(nullable = false)
+    private Long advertisementViewCount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -30,22 +36,21 @@ public class Playback extends Timestamped {
     @JoinColumn(name = "video_id")
     private Video video;
 
-    public static Playback createUserPlayback(User user, Video video, Long lastPlayTime) {
+    public static Playback createUserPlayback(Long lastPlayPosition, User user, Video video) {
         Playback playback = new Playback();
+        playback.videoPlayedTime = 0L;
+        playback.lastPlayPosition = lastPlayPosition;
+        playback.advertisementViewCount = 0L;
         playback.user = user;
         playback.video = video;
-        playback.lastPlayTime = lastPlayTime;
-        playback.video.addAccumulatedViewCount();
         return playback;
     }
 
-    public void updateStartPosition() {
-        if (this.lastPlayTime >= video.getPlaybackTime()) {
-            this.lastPlayTime = 0L;
-        }
+    public void updateVideoPlayedTime(Long videoPlayedTime) {
+        this.videoPlayedTime = videoPlayedTime;
     }
 
-    public void update(Long currentPosition) {
-        this.lastPlayTime = currentPosition;
+    public void addAdvertisementViewCount() {
+        this.advertisementViewCount++;
     }
 }

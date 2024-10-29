@@ -13,8 +13,8 @@ public class PlaybackRepositoryImpl implements PlaybackRepository {
     private final PlaybackJpaRepository playbackJpaRepository;
 
     @Override
-    public Optional<Playback> findByUserIdAndVideoIdFetchVideo(Long userId, Long videoId) {
-        return playbackJpaRepository.findByUserIdAndVideoIdFetchVideo(userId, videoId);
+    public Optional<Playback> findByUserIdAndVideoId(Long userId, Long videoId) {
+        return playbackJpaRepository.findByUserIdAndVideoId(userId, videoId);
     }
 
     @Override

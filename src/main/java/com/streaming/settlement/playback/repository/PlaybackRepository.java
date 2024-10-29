@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public interface PlaybackRepository {
 
-    Optional<Playback> findByUserIdAndVideoIdFetchVideo(Long userId, Long videoId);
+    Optional<Playback> findByUserIdAndVideoId(Long userId, Long videoId);
 
     Playback save(Playback playback);
 }
