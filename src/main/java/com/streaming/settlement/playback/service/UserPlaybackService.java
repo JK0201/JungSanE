@@ -1,6 +1,5 @@
 package com.streaming.settlement.playback.service;
 
-import com.streaming.settlement.advertisement.entity.VideoAdvertisement;
 import com.streaming.settlement.playback.dto.StopRequest;
 import com.streaming.settlement.playback.entity.Playback;
 import com.streaming.settlement.playback.repository.PlaybackRepository;
@@ -9,6 +8,7 @@ import com.streaming.settlement.user.entity.User;
 import com.streaming.settlement.user.repository.UserRepository;
 import com.streaming.settlement.user.security.CustomOAuth2User;
 import com.streaming.settlement.video.entity.Video;
+import com.streaming.settlement.video.entity.VideoAdvertisement;
 import com.streaming.settlement.video.entity.VideoStatus;
 import com.streaming.settlement.video.exception.ResourceNotFoundException;
 import com.streaming.settlement.video.repository.VideoRepository;
@@ -51,7 +51,7 @@ public class UserPlaybackService {
                 .orElseThrow(() -> new ResourceNotFoundException("해당 영상을 찾을 수 없습니다. : video_id : " + videoId));
 
         log.info("기존 영상 조회수 = video_id : {}, total : {}", videoId, video.getAccumulatedViewCount());
-        video.addAccumulatedViewCount();
+        video.incrementAccumulatedViewCount();
         log.info("조회수 증가 = video_id : {}, total : {}", videoId, video.getAccumulatedViewCount());
 
         return playbackRepository.findByUserIdAndVideoId(user.getId(), videoId)
@@ -126,7 +126,7 @@ public class UserPlaybackService {
                     log.info("광고 조회 = 광고 시청 지점 : {}, 유저 영상 정지 시점 : {}", videoAdvertisement.getPlaybackTime(), currentPosition);
                     log.info("기존 광고 조회수 = videoAdvertisement_id : {}, total : {}", videoAdvertisement.getId(), videoAdvertisement.getAccumulatedViewCount());
                     videoAdvertisement.addAccumulatedViewCount();
-                    playback.addAdvertisementViewCount();
+                    playback.incrementAdvertisementViewCount();
                     log.info("광고 조회수 증가= videoAdvertisement_id : {}, total : {}", videoAdvertisement.getId(), videoAdvertisement.getAccumulatedViewCount());
                 }
             }

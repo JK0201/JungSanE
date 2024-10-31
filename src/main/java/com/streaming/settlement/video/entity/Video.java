@@ -1,6 +1,5 @@
 package com.streaming.settlement.video.entity;
 
-import com.streaming.settlement.advertisement.entity.VideoAdvertisement;
 import com.streaming.settlement.user.entity.User;
 import com.streaming.settlement.video.dto.VideoPublish;
 import jakarta.persistence.*;
@@ -68,7 +67,7 @@ public class Video extends Timestamped {
         generateAdvertisement();
     }
 
-    public void addAccumulatedViewCount() {
+    public void incrementAccumulatedViewCount() {
         this.accumulatedViewCount++;
     }
 

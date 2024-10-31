@@ -50,7 +50,7 @@ public class Playback extends Timestamped {
         this.videoPlayedTime = videoPlayedTime;
     }
 
-    public void addAdvertisementViewCount() {
+    public void incrementAdvertisementViewCount() {
         this.advertisementViewCount++;
     }
 }

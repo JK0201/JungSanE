@@ -1,6 +1,5 @@
-package com.streaming.settlement.advertisement.entity;
+package com.streaming.settlement.video.entity;
 
-import com.streaming.settlement.video.entity.Video;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
