@@ -5,7 +5,9 @@ import com.streaming.settlement.user.security.CustomOAuth2User;
 import com.streaming.settlement.video.dto.VideoPublish;
 import com.streaming.settlement.video.dto.VideoResponse;
 import com.streaming.settlement.video.entity.Video;
+import com.streaming.settlement.video.entity.VideoSnapshot;
 import com.streaming.settlement.video.repository.VideoRepository;
+import com.streaming.settlement.video.repository.VideoSnapshotJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ public class VideoCommandService {
 
     private final VideoRepository videoRepository;
     private final PublishService publishService;
+    private final VideoSnapshotJpaRepository videoSnapshotJpaRepository;
 
     /**
      * 영상 업로드
@@ -28,6 +31,8 @@ public class VideoCommandService {
     public VideoResponse publish(VideoPublish videoPublish, CustomOAuth2User oAuth2User) {
         User user = publishService.findUploader(oAuth2User);
         Video video = Video.fromPublish(videoPublish, user);
+        VideoSnapshot videoSnapshot = VideoSnapshot.fromVideo(video);
+        videoSnapshotJpaRepository.save(videoSnapshot);
         video = videoRepository.save(video);
         return VideoResponse.from(video);
     }

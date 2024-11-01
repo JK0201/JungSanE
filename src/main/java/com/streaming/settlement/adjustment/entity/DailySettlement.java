@@ -36,7 +36,13 @@ public class DailySettlement {
     @JoinColumn(name = "video_id")
     private Video video;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "daily_statistic_id")
-    private DailyStatistic dailyStatistic;
+    public static DailySettlement from(BigDecimal videoRevenue, BigDecimal advertisementRevenue, Video video) {
+        DailySettlement dailySettlement = new DailySettlement();
+        dailySettlement.videoRevenue = videoRevenue;
+        dailySettlement.advertisementRevenue = advertisementRevenue;
+        dailySettlement.totalRevenue = videoRevenue.add(advertisementRevenue);
+        dailySettlement.settlementDate = LocalDate.now().minusDays(1);
+        dailySettlement.video = video;
+        return dailySettlement;
+    }
 }
