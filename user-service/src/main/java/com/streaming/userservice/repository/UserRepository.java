@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface UserRepository {
 
-    Optional<User> findByAuthProviderAndUsername(AuthProvider authProvider, String username);
+    Optional<User> findByProviderAndUsername(AuthProvider authProvider, String username);
 
     User save(User newUser);
 }

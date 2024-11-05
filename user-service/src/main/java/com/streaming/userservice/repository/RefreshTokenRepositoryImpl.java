@@ -1,6 +1,5 @@
 package com.streaming.userservice.repository;
 
-import com.streaming.userservice.entity.AuthProvider;
 import com.streaming.userservice.entity.RefreshToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -15,13 +14,13 @@ public class RefreshTokenRepositoryImpl implements RefreshTokenRepository {
     private final RefreshTokenJpaRepository refreshTokenJpaRepository;
 
     @Override
-    public Optional<RefreshToken> findByRefreshTokenFetchUser(AuthProvider authProvider, String username, String refreshToken) {
-        return refreshTokenJpaRepository.findByRefreshTokenFetchUser(authProvider, username, refreshToken);
+    public void save(RefreshToken newRefreshToken) {
+        refreshTokenJpaRepository.save(newRefreshToken);
     }
 
     @Override
-    public void save(RefreshToken newRefreshToken) {
-        refreshTokenJpaRepository.save(newRefreshToken);
+    public Optional<RefreshToken> findByUserIdAndRefreshToken(Long userId, String refreshToken) {
+        return refreshTokenJpaRepository.findByUserIdAndRefreshToken(userId, refreshToken);
     }
 
     @Override

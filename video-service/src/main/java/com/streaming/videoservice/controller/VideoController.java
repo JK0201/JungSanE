@@ -5,6 +5,7 @@ import com.streaming.videoservice.dto.StopRequest;
 import com.streaming.videoservice.dto.VideoPublish;
 import com.streaming.videoservice.dto.VideoResponse;
 import com.streaming.videoservice.service.VideoCommandService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,9 +22,11 @@ public class VideoController {
     // FIXME 파라미터에 유저 아이디 부분 추가
     @PostMapping("/publish")
     public ResponseEntity<VideoResponse> publish(
+            HttpServletRequest request,
             @Valid @RequestBody VideoPublish videoPublish
     ) {
         Long userId = 1L;
+        System.out.println(request.getHeaders("X-User-Id"));
 
         VideoResponse videoResponse = videoCommandService.publish(videoPublish, userId);
         return ResponseEntity

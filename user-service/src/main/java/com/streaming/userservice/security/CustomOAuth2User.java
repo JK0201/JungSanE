@@ -1,15 +1,13 @@
 package com.streaming.userservice.security;
 
-import com.streaming.userservice.entity.AuthProvider;
 import com.streaming.userservice.entity.User;
-import com.streaming.userservice.entity.UserRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 @RequiredArgsConstructor
@@ -23,31 +21,30 @@ public class CustomOAuth2User implements OAuth2User {
         return null;
     }
 
-    // role.getAuthority(String - ROLE_USER, ROLE_UPLOADER)
+    // UserRole.getAuthority()
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        UserRole role = user.getRole();
-        String authority = role.getAuthority();
-
-        SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(authority);
-        Collection<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(simpleGrantedAuthority);
-
-        return authorities;
+        return Collections.singleton(new SimpleGrantedAuthority(user.getRole().getAuthority()));
     }
 
+    // User Id (String)
     @Override
     public String getName() {
-        return user.getNickname();
+        return String.valueOf(user.getId());
     }
 
-    // 고유 아이디값 (Provider + ProviderId)
-    public String getUsername() {
-        return user.getUsername();
-    }
+//    @Override
+//    public String getName() {
+//        return user.getNickname();
+//    }
 
-    // Auth Provider
-    public AuthProvider getAuthProvider() {
-        return user.getAuthProvider();
-    }
+//    // 고유 아이디값 (Provider + ProviderId)
+//    public String getUsername() {
+//        return user.getUsername();
+//    }
+
+//    // Auth Provider
+//    public AuthProvider getAuthProvider() {
+//        return user.getAuthProvider();
+//    }
 }

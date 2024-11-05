@@ -35,16 +35,16 @@ public class User extends Timestamped {
     @Column(nullable = false)
     private AuthProvider authProvider;
 
-    public static User from() {
-        User user = new User();
-        user.id = user.getId();
-        user.email = user.getEmail();
-        user.username = user.getUsername();
-        user.nickname = user.getNickname();
-        user.role = user.getRole();
-        user.authProvider = user.getAuthProvider();
-        return user;
-    }
+//    public static User from() {
+//        User user = new User();
+//        user.id = user.getId();
+//        user.email = user.getEmail();
+//        user.username = user.getUsername();
+//        user.nickname = user.getNickname();
+//        user.role = user.getRole();
+//        user.authProvider = user.getAuthProvider();
+//        return user;
+//    }
 
     public static User fromOAuth(String username, OAuth2Response oAuth2Response, AuthProvider authProvider) {
         User user = new User();

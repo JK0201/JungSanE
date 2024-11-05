@@ -28,11 +28,6 @@ public enum AuthProvider {
 
     // 요청이 들어왔을때 O(1)로 조회하여 UserRole 반환
     public static AuthProvider fromProvider(String provider) {
-        AuthProvider authProvider = ROLE_MAP.get(provider);
-        if (authProvider == null) {
-            throw new IllegalArgumentException("잘못된 소셜 로그인 제공자 입니다. : " + provider);
-        }
-
-        return authProvider;
+        return ROLE_MAP.get(provider);
     }
 }

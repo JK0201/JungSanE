@@ -1,18 +1,23 @@
 package com.streaming.userservice.config;
 
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.SecurityException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Date;
+import java.util.Optional;
+
+import static com.streaming.common.constant.JwtConstant.*;
 
 @Slf4j(topic = " 토큰 Provider")
 @Component
@@ -25,48 +30,57 @@ public class JwtUtil {
         secretKey = new SecretKeySpec(decodedKey, "HmacSHA256");
     }
 
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String GRANT_TYPE = "grant_type";
-    public static final String CLAIM_USERNAME = "username";
-    public static final String CLAIM_ROLE = "role";
-    public static final String CLAIM_PROVIDER = "provider";
-    public static final String TOKEN_PREFIX = "Bearer ";
-    // FIXME 토큰 시간 변경 요망
-    public static final Long ACCESS_TOKEN_EXPIRY_TIME = 864000000L; // Access Token 10mins
-    public static final Long REFRESH_TOKEN_EXPIRY_TIME = 864000000L; // Refresh Token 24hrs
+    /**
+     * Access Token 생성
+     *
+     * @param userId (String)
+     * @param role   (String)
+     * @return Access Token (String)
+     */
+    public String generateAccessToken(String userId, String role) {
+        return TOKEN_PREFIX +
+                generateToken("ACCESS", userId, role, ACCESS_TOKEN_EXPIRY_TIME);
+    }
+
+    /**
+     * Refresh Token 생성
+     *
+     * @param userId (String)
+     * @param role   (String)
+     * @return Refresh Token (String)
+     */
+    public String generateRefreshToken(String userId, String role) {
+        return generateToken("REFRESH", userId, role, REFRESH_TOKEN_EXPIRY_TIME);
+    }
 
     /**
      * 토큰 생성
      *
-     * @param username (String)
-     * @param role     (UserRole)
+     * @param tokenType  ACCESS / REFRESH (String)
+     * @param userId     (String)
+     * @param role       (UserRole)
+     * @param expireTime (Long)
      * @return JWT Token (String)
      */
-    public String generateToken(String tokenType, String username, String role, String authProvider, Long expireTime) {
+    public String generateToken(String tokenType, String userId, String role, Long expireTime) {
         return Jwts.builder()
                 .claim(GRANT_TYPE, tokenType)
-                .claim(CLAIM_USERNAME, username)
+                .claim(CLAIM_USER_ID, userId)
                 .claim(CLAIM_ROLE, role)
-                .claim(CLAIM_PROVIDER, authProvider)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expireTime))
                 .signWith(secretKey)
                 .compact();
     }
 
-    /**
-     * Header로 받아온 Access Token을 "Bearer "와 분리하여 반환
-     *
-     * @param request (HttpServletRequest)
-     * @return Access Token (String)
-     */
-    public String getAccessTokenFromHeader(HttpServletRequest request) {
-        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(TOKEN_PREFIX)) {
-            return bearerToken.substring(7); // "Bearer " 이후 뒤쪽의 토큰을 반환
-        }
-
-        return null;
+    public ResponseCookie createCookie(String refreshToken) {
+        return ResponseCookie.from(REFRESH_TOKEN, refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(REFRESH_TOKEN_EXPIRY_TIME)
+                .sameSite("Lax")
+                .build();
     }
 
     /**
@@ -75,57 +89,49 @@ public class JwtUtil {
      * @param request (HttpServletRequest)
      * @return Refresh Token (String)
      */
-    public String getRefreshTokenFromCookie(HttpServletRequest request) {
+    public Optional<String> extractRefreshToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (AUTHORIZATION_HEADER.equals(cookie.getName())) {
-                    return cookie.getValue();
+                if (REFRESH_TOKEN.equals(cookie.getName())) {
+                    return Optional.of(cookie.getValue());
                 }
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
     /**
-     * 토큰 검증 로직
+     * 토큰 검증 후, 사용자 정보 추출,
      *
-     * @param token (String)
-     * @return boolean
+     * @param token Refresh Token (String)
+     * @return Claims (토큰내 유저 Claim 정보)
      */
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token);
-
-            return true;
-        } catch (SecurityException | MalformedJwtException ex) {
-            log.error("Invalid JWT signature, 유효하지 않은 JWT 서명 입니다.");
-        } catch (ExpiredJwtException ex) {
-            log.error("Expired JWT token, 만료된 JWT token 입니다.");
-        } catch (UnsupportedJwtException ex) {
-            log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
-        } catch (IllegalArgumentException ex) {
-            log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
-        }
-
-        return false;
-    }
-
-    /**
-     * 토큰에서 사용자 정보 가져오기
-     *
-     * @param token (String)
-     * @return Claims
-     */
-    public Claims userInformationFromToken(String token) {
+    public Claims validateAndExtractClaims(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    /**
+     * Refresh Token 만료 일자 추출
+     *
+     * @param refreshToken (String)
+     * @return LocalDateTime
+     */
+    public LocalDateTime getExpiryTimeFromRefreshToken(String refreshToken) {
+        Date expiryDate = Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(refreshToken)
+                .getPayload()
+                .getExpiration();
+
+        return expiryDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
     }
 }

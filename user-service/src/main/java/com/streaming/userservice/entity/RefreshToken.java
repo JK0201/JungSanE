@@ -18,26 +18,25 @@ public class RefreshToken {
     @Column(name = "refresh_token_id")
     private Long id;
 
+    @Column(nullable = false)
+    private Long userId;
+
     @Column(nullable = false, length = 500)
     private String refreshToken;
 
     @Column(nullable = false)
     private LocalDateTime expiryTime;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    public static RefreshToken fromCreatedToken(String createdRefreshToken, Long expiryTime, User user) {
+    public static RefreshToken fromCreatedToken(String createdRefreshToken, LocalDateTime expiryTime, Long userId) {
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.refreshToken = createdRefreshToken;
-        refreshToken.expiryTime = LocalDateTime.now().plusSeconds(expiryTime / 1000);
-        refreshToken.user = user;
+        refreshToken.expiryTime = expiryTime;
+        refreshToken.userId = userId;
         return refreshToken;
     }
 
-    public void update(String newRefreshToken, Long expiryTime) {
+    public void update(String newRefreshToken, LocalDateTime expiryTime) {
         this.refreshToken = newRefreshToken;
-        this.expiryTime = LocalDateTime.now().plusSeconds(expiryTime / 1000);
+        this.expiryTime = expiryTime;
     }
 }
