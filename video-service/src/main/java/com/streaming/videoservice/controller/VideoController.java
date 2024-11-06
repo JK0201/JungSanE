@@ -1,5 +1,6 @@
 package com.streaming.videoservice.controller;
 
+import com.streaming.common.utils.RequestParser;
 import com.streaming.videoservice.dto.PlaybackResponse;
 import com.streaming.videoservice.dto.StopRequest;
 import com.streaming.videoservice.dto.VideoPublish;
@@ -19,31 +20,27 @@ public class VideoController {
 
     private final VideoCommandService videoCommandService;
 
-    // FIXME 파라미터에 유저 아이디 부분 추가
     @PostMapping("/publish")
     public ResponseEntity<VideoResponse> publish(
             HttpServletRequest request,
             @Valid @RequestBody VideoPublish videoPublish
     ) {
-        Long userId = 1L;
-        System.out.println(request.getHeaders("X-User-Id"));
-
+        Long userId = RequestParser.extractUserIdFromHeader(request);
         VideoResponse videoResponse = videoCommandService.publish(videoPublish, userId);
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(videoResponse);
     }
 
-    // FIXME 파라미터에 유저 아이디 부분 추가
     @PostMapping("/{video_id}/start")
     public ResponseEntity<PlaybackResponse> start(
             HttpServletRequest request,
             @PathVariable("video_id") Long videoId
     ) {
-        Long userId = 1L;
-        System.out.println(request.getHeaders("X-User-Id"));
-
+        Long userId = RequestParser.extractUserIdFromHeader(request);
         PlaybackResponse playbackResponse = videoCommandService.start(videoId, userId);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(playbackResponse);
@@ -55,10 +52,9 @@ public class VideoController {
             @PathVariable("video_id") Long videoId,
             @Valid @RequestBody StopRequest stopRequest
     ) {
-        Long userId = 1L;
-        System.out.println(request.getHeaders("X-User-Id"));
-
+        Long userId = RequestParser.extractUserIdFromHeader(request);
         PlaybackResponse playbackResponse = videoCommandService.stop(videoId, stopRequest, userId);
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(playbackResponse);

@@ -11,13 +11,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class StatisticQueryService {
 
     private final LocalDate YESTERDAY = LocalDate.now().minusDays(1);
 
     private final DailyStatisticRepository dailyStatisticRepository;
 
+    @Transactional(readOnly = true)
     public List<StatisticResponse> dailyTopViewed() {
 //        List<StatisticResponse> dailyTop5 = dailyStatisticRepository
 //                .findDailyTop5ByVideoViewCount(YESTERDAY);

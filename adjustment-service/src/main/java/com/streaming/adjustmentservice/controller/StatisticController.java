@@ -21,6 +21,7 @@ public class StatisticController {
     @GetMapping("/daily/views")
     public ResponseEntity<List<StatisticResponse>> dailyTopViewed() {
         System.out.println("request");
+        
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(statisticQueryService.dailyTopViewed());

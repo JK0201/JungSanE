@@ -18,11 +18,9 @@ public class TestController {
 
     @GetMapping("/api/test")
     public String test(@RequestParam("value") String value) throws Exception {
-
         JobParameters jobParameters = new JobParametersBuilder()
                 .addString("date", value)
                 .toJobParameters();
-
         jobLauncher.run(jobRegistry.getJob("dailyStatisticJob"), jobParameters);
 
         return "ok";

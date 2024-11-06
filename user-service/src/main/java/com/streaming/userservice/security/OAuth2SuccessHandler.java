@@ -22,10 +22,11 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Iterator;
 
+import static com.streaming.common.constant.JwtConstant.REFRESH_TOKEN_EXPIRY_TIME;
+
 @Slf4j(topic = "로그인 인증 성공")
 @Component
 @RequiredArgsConstructor
-@Transactional
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtUtil jwtUtil;
@@ -35,6 +36,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private String REDIRECT_URL;
 
     @Override
+    @Transactional
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         // 성공적으로 Provider 사이트에 로그인한 유저의 정보가 넘어온 것을 사용하여 토큰 생성
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
@@ -53,7 +55,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
         log.info("Last Login At = {}", LocalDateTime.now());
 
-        ResponseCookie cookie = jwtUtil.createCookie(refreshToken);
+        // Refresh Token 생성 및 Redirect 설정
+        ResponseCookie cookie = jwtUtil.createCookie(refreshToken, REFRESH_TOKEN_EXPIRY_TIME);
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         response.sendRedirect(REDIRECT_URL);
     }

@@ -75,35 +75,16 @@ public class JwtUtil {
      * @param refreshToken (String)
      * @return ResponseCookie
      */
-    public ResponseCookie createCookie(String refreshToken) {
+    public ResponseCookie createCookie(String refreshToken, Long expiryTime) {
         return ResponseCookie.from(REFRESH_TOKEN, refreshToken)
+                .maxAge(expiryTime)
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .maxAge(REFRESH_TOKEN_EXPIRY_TIME)
                 .sameSite("Lax")
                 .build();
     }
-
-//    /**
-//     * Cookie에서 Refresh Token을 찾아서 반환
-//     *
-//     * @param request (HttpServletRequest)
-//     * @return Refresh Token (String)
-//     */
-//    public Optional<String> extractRefreshToken(HttpServletRequest request) {
-//        Cookie[] cookies = request.getCookies();
-//        if (cookies != null) {
-//            for (Cookie cookie : cookies) {
-//                if (REFRESH_TOKEN.equals(cookie.getName())) {
-//                    return Optional.of(cookie.getValue());
-//                }
-//            }
-//        }
-//
-//        return Optional.empty();
-//    }
-
+    
     /**
      * 토큰 검증 후, 사용자 정보 추출,
      *

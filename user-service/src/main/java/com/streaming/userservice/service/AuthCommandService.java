@@ -6,8 +6,12 @@ import com.streaming.userservice.dto.TokenWrapper;
 import com.streaming.userservice.entity.RefreshToken;
 import com.streaming.userservice.repository.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.ws.rs.core.HttpHeaders;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +25,15 @@ public class AuthCommandService {
     private final JwtUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    @Value("${spring.base.url}")
+    private String REDIRECT_URL;
+
+    /**
+     * Cookie에서 추출한 기존 Refresh Token을 검증 후, Access Token과 Refresh Token 반환
+     *
+     * @param refreshToken (String)
+     * @return TokenWrapper
+     */
     @Transactional
     public TokenWrapper reissueToken(String refreshToken) {
         try {
@@ -50,6 +63,26 @@ public class AuthCommandService {
             return TokenWrapper.from(newAccessToken, newRefreshToken);
         } catch (Exception ex) {
             throw new InvalidTokenException("Token reissue failed");
+        }
+    }
+
+    /**
+     * Cookie에 Refresh Token이 있을 경우, DB의 Refresh Token 삭제
+     * 연속적인 로그아웃 요청 방지를 위해 서비스 레이어에서 확인 후
+     * 초기화 한 Refresh Token을 반환
+     *
+     * @param refreshToken (String)
+     * @param response     (HttpServletResponse)
+     */
+    @Transactional
+    public void logout(String refreshToken, HttpServletResponse response) {
+        if (refreshToken != null && !refreshToken.trim().isEmpty()) {
+            // DB에서 Refresh Token 제거
+            refreshTokenRepository.deleteByRefreshToken(refreshToken);
+
+            // Refresh Token 쿠키 "정상화 신 창 섭"
+            ResponseCookie cookie = jwtUtil.createCookie("", 0L);
+            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         }
     }
 }
