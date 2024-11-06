@@ -4,6 +4,7 @@ import com.streaming.gatewayservice.config.JwtUtil;
 import com.streaming.gatewayservice.response.ResponseHandler;
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -15,18 +16,23 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static com.streaming.gatewayservice.constant.ApiPath.LoadBalancerUri.TOKEN_REISSUE_LB;
-import static com.streaming.gatewayservice.constant.JwtConstant.JwtToken.CLAIM_USER_ID;
-import static com.streaming.gatewayservice.constant.JwtConstant.JwtToken.REFRESH_TOKEN;
+import static com.streaming.gatewayservice.constant.JwtConstant.JwtToken.*;
 import static com.streaming.gatewayservice.constant.JwtConstant.RequestHeader.USER_ID_HEADER;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class TokenHandler {
 
     private final JwtUtil jwtUtil;
-    private final WebClient webClient;
+    private final WebClient userServiceWebClient;
 
+    /**
+     * 토큰 재발급을 위해 RefreshToken Cookie에서 추출
+     *
+     * @param exchange (ServerWebExchange)
+     * @param chain    (GatewayFilterChain)
+     */
     public Mono<Void> expiredAccessToken(ServerWebExchange exchange, GatewayFilterChain chain) {
         HttpCookie refreshTokenCookie = exchange.getRequest()
                 .getCookies()
@@ -41,19 +47,27 @@ public class TokenHandler {
         return reissue(exchange, chain, refreshTokenCookie.getValue());
     }
 
+    /**
+     * WebClient를 사용하여, reissue 경로로 Access Token과 Refresh Token 재발급 요청
+     *
+     * @param exchange     (ServerWebExchange)
+     * @param chain        (GatewayFilterChain)
+     * @param refreshToken (String)
+     */
     public Mono<Void> reissue(ServerWebExchange exchange, GatewayFilterChain chain, String refreshToken) {
-        return webClient.post()
-                .uri(TOKEN_REISSUE_LB)
+        return userServiceWebClient.post()
+                .uri("/auth/v2/reissue")
                 .cookie(REFRESH_TOKEN, refreshToken)
                 .retrieve()
                 .toEntity(Void.class)
                 .flatMap(response -> {
                     // 새로운 Access Token 추출
                     String newAccessToken = response.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-                    if (newAccessToken == null)
+                    if (newAccessToken == null) {
                         return ResponseHandler.unauthorized(
                                 exchange.getResponse(),
                                 "Token reissue failed");
+                    }
 
                     try {
                         // 새로 받은 Access Token 검증 및 Claims 추출
@@ -63,12 +77,12 @@ public class TokenHandler {
 
                         // 새로 받은 Access Token으로 Header 수정
                         ServerHttpRequest modifiedRequest = exchange.getRequest().mutate()
-                                .header(HttpHeaders.AUTHORIZATION, newAccessToken)
+                                .header(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + newAccessToken)
                                 .build();
 
                         // 클라이언트에게 새 Access Token 전달 (Header)
                         exchange.getResponse().getHeaders()
-                                .add(HttpHeaders.AUTHORIZATION, newAccessToken);
+                                .add(HttpHeaders.AUTHORIZATION, TOKEN_PREFIX + newAccessToken);
 
                         // 클라이언트에게 새 Refresh Token 전달 (Cookie)
                         List<String> cookies = response.getHeaders().get(HttpHeaders.SET_COOKIE);
@@ -76,6 +90,7 @@ public class TokenHandler {
                             exchange.getResponse().getHeaders().put(HttpHeaders.SET_COOKIE, cookies);
                         }
 
+                        // 다음 필터 진행
                         return chain.filter(exchange.mutate()
                                 .request(modifiedRequest)
                                 .build());

@@ -32,19 +32,4 @@ public class CustomOAuth2User implements OAuth2User {
     public String getName() {
         return String.valueOf(user.getId());
     }
-
-//    @Override
-//    public String getName() {
-//        return user.getNickname();
-//    }
-
-//    // 고유 아이디값 (Provider + ProviderId)
-//    public String getUsername() {
-//        return user.getUsername();
-//    }
-
-//    // Auth Provider
-//    public AuthProvider getAuthProvider() {
-//        return user.getAuthProvider();
-//    }
 }

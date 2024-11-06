@@ -32,20 +32,20 @@ public class AuthorizationFilter implements GlobalFilter, Ordered {
         // 공개 경로면 다음 필터 진행
         if (routeValidator.isPublicRoute(path)) return chain.filter(exchange);
 
+        // 이전 필터에서 attributes에 저장한 claims 추출
         Claims claims = exchange.getAttribute("claims");
         if (claims == null) {
             return ResponseHandler.unauthorized(exchange.getResponse(), "Missing token claims");
         }
 
+        // 특정 권한이 필요한 요청에 대해 검증
         String role = claims.get(CLAIM_ROLE, String.class);
-
         if (!routeValidator.hasPermission(path, role)) {
             return ResponseHandler.forbidden(
                     exchange.getResponse(),
                     "Access denied: insufficient permissions"
             );
         }
-
         return tokenHandler.validToken(exchange, chain, claims);
     }
 

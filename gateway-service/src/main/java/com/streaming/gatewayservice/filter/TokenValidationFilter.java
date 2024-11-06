@@ -60,6 +60,7 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
             exchange.getAttributes().put("claims", claims);
             return chain.filter(exchange);
         } catch (ExpiredJwtException ex) {
+            // Access Token 만료시, Refresh Token을 사용하여 재발급
             return tokenHandler.expiredAccessToken(exchange, chain);
         } catch (Exception ex) {
             return ResponseHandler.unauthorized(

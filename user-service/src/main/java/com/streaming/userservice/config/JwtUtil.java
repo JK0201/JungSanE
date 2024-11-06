@@ -2,8 +2,6 @@ package com.streaming.userservice.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
@@ -15,7 +13,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Date;
-import java.util.Optional;
 
 import static com.streaming.common.constant.JwtConstant.*;
 
@@ -38,8 +35,7 @@ public class JwtUtil {
      * @return Access Token (String)
      */
     public String generateAccessToken(String userId, String role) {
-        return TOKEN_PREFIX +
-                generateToken("ACCESS", userId, role, ACCESS_TOKEN_EXPIRY_TIME);
+        return generateToken("ACCESS", userId, role, ACCESS_TOKEN_EXPIRY_TIME);
     }
 
     /**
@@ -73,6 +69,12 @@ public class JwtUtil {
                 .compact();
     }
 
+    /**
+     * Refresh Token Cookie 생성
+     *
+     * @param refreshToken (String)
+     * @return ResponseCookie
+     */
     public ResponseCookie createCookie(String refreshToken) {
         return ResponseCookie.from(REFRESH_TOKEN, refreshToken)
                 .httpOnly(true)
@@ -83,24 +85,24 @@ public class JwtUtil {
                 .build();
     }
 
-    /**
-     * Cookie에서 Refresh Token을 찾아서 반환
-     *
-     * @param request (HttpServletRequest)
-     * @return Refresh Token (String)
-     */
-    public Optional<String> extractRefreshToken(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (REFRESH_TOKEN.equals(cookie.getName())) {
-                    return Optional.of(cookie.getValue());
-                }
-            }
-        }
-
-        return Optional.empty();
-    }
+//    /**
+//     * Cookie에서 Refresh Token을 찾아서 반환
+//     *
+//     * @param request (HttpServletRequest)
+//     * @return Refresh Token (String)
+//     */
+//    public Optional<String> extractRefreshToken(HttpServletRequest request) {
+//        Cookie[] cookies = request.getCookies();
+//        if (cookies != null) {
+//            for (Cookie cookie : cookies) {
+//                if (REFRESH_TOKEN.equals(cookie.getName())) {
+//                    return Optional.of(cookie.getValue());
+//                }
+//            }
+//        }
+//
+//        return Optional.empty();
+//    }
 
     /**
      * 토큰 검증 후, 사용자 정보 추출,

@@ -37,9 +37,11 @@ public class VideoController {
     // FIXME 파라미터에 유저 아이디 부분 추가
     @PostMapping("/{video_id}/start")
     public ResponseEntity<PlaybackResponse> start(
+            HttpServletRequest request,
             @PathVariable("video_id") Long videoId
     ) {
         Long userId = 1L;
+        System.out.println(request.getHeaders("X-User-Id"));
 
         PlaybackResponse playbackResponse = videoCommandService.start(videoId, userId);
         return ResponseEntity
@@ -49,10 +51,12 @@ public class VideoController {
 
     @PostMapping("/{video_id}/stop")
     public ResponseEntity<PlaybackResponse> stop(
+            HttpServletRequest request,
             @PathVariable("video_id") Long videoId,
             @Valid @RequestBody StopRequest stopRequest
     ) {
         Long userId = 1L;
+        System.out.println(request.getHeaders("X-User-Id"));
 
         PlaybackResponse playbackResponse = videoCommandService.stop(videoId, stopRequest, userId);
         return ResponseEntity

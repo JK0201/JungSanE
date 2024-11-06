@@ -15,7 +15,6 @@ public class ApiPath {
     // Load Balancer URI
     public static class LoadBalancerUri {
         public static final String USER_SERVICE_LB = "lb://user-service";
-        public static final String TOKEN_REISSUE_LB = "lb://user-service/auth/reissue";
         public static final String VIDEO_SERVICE_LB = "lb://video-service";
         public static final String ADJUSTMENT_SERVICE_LB = "lb://adjustment-service";
     }
@@ -30,7 +29,7 @@ public class ApiPath {
     // Protected API (권한별 경로)
     public static final Map<String, Set<String>> protectedApi =
             Map.of(
-                    "video-service/api/v*/video/publish"
+                    "/video-service/api/v*/video/publish"
                     , Set.of("ROLE_UPLOADER", "ROLE_ADMIN")
             );
 }

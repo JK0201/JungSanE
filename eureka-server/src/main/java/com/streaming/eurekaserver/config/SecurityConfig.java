@@ -1,4 +1,4 @@
-package com.streaming.eurekaserver.security;
+package com.streaming.eurekaserver.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

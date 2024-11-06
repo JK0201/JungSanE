@@ -1,7 +1,7 @@
 package com.streaming.gatewayservice.constant;
 
 public class JwtConstant {
-
+    
     public static class JwtToken {
         public static final String REFRESH_TOKEN = "refresh_token";
         public static final String GRANT_TYPE = "grant_type";

@@ -20,8 +20,6 @@ public class SecurityConfig {
 
     private final OAuth2UserService OAuth2UserService;
     private final OAuth2SuccessHandler OAuth2SuccessHandler;
-//    private final RefreshTokenRepository refreshTokenRepository;
-//    private final JwtUtil jwtUtil;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -43,18 +41,12 @@ public class SecurityConfig {
         http.oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo -> userInfo
                         .userService(OAuth2UserService))
-                .successHandler(OAuth2SuccessHandler)
-                .redirectionEndpoint(redirection -> redirection
-                        .baseUri("/login/oauth2/code/*")));
+                .successHandler(OAuth2SuccessHandler));
 
         // 경로 인가 설정
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/oauth2/**", "/login/**", "/auth/**").permitAll()
+                .requestMatchers("/auth/**", "/oauth2/**", "/login/**").permitAll()
                 .anyRequest().authenticated());
-
-//        // JwtFilter 추가 (
-//        http.addFilterBefore(new JwtAuthorizationFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-//        http.addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshTokenRepository), LogoutFilter.class);
 
         return http.build();
     }

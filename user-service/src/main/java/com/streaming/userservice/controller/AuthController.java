@@ -37,8 +37,9 @@ public class AuthController {
 
         // 새로운 Access Token Header에 추가
         response.setHeader(AUTHORIZATION_HEADER, tokens.getAccessToken());
+
         // 새로운 Refresh Token Cookie에 추가
-        ResponseCookie cookie = jwtUtil.createCookie(refreshToken);
+        ResponseCookie cookie = jwtUtil.createCookie(tokens.getRefreshToken());
         response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity

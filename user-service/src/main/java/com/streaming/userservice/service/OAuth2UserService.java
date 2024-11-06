@@ -28,10 +28,6 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        log.info("OAuth2UserService.loadUser called");
-        log.info("ClientRegistration: {}", userRequest.getClientRegistration().getRegistrationId());
-        log.info("Access Token: {}", userRequest.getAccessToken().getTokenValue());
-
         OAuth2User oAuth2User = super.loadUser(userRequest);
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
