@@ -23,13 +23,19 @@ public class ApiPath {
     public static final List<String> publicApi = List.of(
             "/user-service/auth/**",
             "/user-service/oauth2/**",
-            "/user-service/login/**"
+            "/user-service/login/**",
+
+            // Circuit Breaker Test
+            "/video-service/test/**"
     );
 
     // Protected API (권한별 경로)
+    // FIXME 권한 ADMIN으로 전환
     public static final Map<String, Set<String>> protectedApi =
             Map.of(
-                    "/video-service/api/v*/video/publish"
-                    , Set.of("ROLE_UPLOADER", "ROLE_ADMIN")
+                    "/video-service/api/v*/video/publish",
+                    Set.of("ROLE_UPLOADER", "ROLE_ADMIN"),
+                    "/**/actuator/health",
+                    Set.of("ROLE_UPLOADER", "ROLE_ADMIN")
             );
 }
