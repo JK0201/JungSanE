@@ -1,13 +1,17 @@
 package com.streaming.videoservice.controller;
 
 import com.streaming.videoservice.client.CircuitBreakerTestServiceClient;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.stream.Stream;
 
 @Slf4j
 @RestController
@@ -33,49 +37,47 @@ public class CircuitBreakerTestController {
         return circuitBreakerTestServiceClient.callCase3();
     }
 
-//    /**
-//     * 1초마다 Adjustment Service에 있는
-//     * ErrorfulController에 요청
-//     */
-//    @Scheduled(cron = "* * * * * *")
-//    public void testEndpoints() {
-//        CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("circuitBreakerTest");
-//
-//        switch (circuitBreaker.getState()) {
-//            case CircuitBreaker.State.OPEN:
-//                log.error("=== Circuit Breaker State: {} ===", circuitBreaker.getState());
-//                break;
-//
-//            case CircuitBreaker.State.HALF_OPEN:
-//                log.warn("=== Circuit Breaker State: {} ===", circuitBreaker.getState());
-//                break;
-//
-//            default:
-//                log.info("=== Circuit Breaker State: {} ===", circuitBreaker.getState());
-//        }
-//
-//        // case1
-//        try {
-//            ResponseEntity<String> response1 = circuitBreakerTestServiceClient.callCase1();
-//            log.info("Case1 Response: {}", response1.getBody());
-//        } catch (Exception ex) {
-//            log.error("Case1 Error: {}", ex.getMessage());
-//        }
-//
-//        // case2
-//        try {
-//            ResponseEntity<String> response2 = circuitBreakerTestServiceClient.callCase1();
-//            log.info("Case2 Response: {}", response2.getBody());
-//        } catch (Exception ex) {
-//            log.error("Case2 Error: {}", ex.getMessage());
-//        }
-//
-//        // case3
-//        try {
-//            ResponseEntity<String> response3 = circuitBreakerTestServiceClient.callCase1();
-//            log.info("Case3 Response: {}", response3.getBody());
-//        } catch (Exception ex) {
-//            log.error("Case3 Error: {}", ex.getMessage());
-//        }
-//    }
+    /**
+     * 1초마다 Adjustment Service에 있는
+     * ErrorfulController에 요청
+     */
+    @Scheduled(cron = "* * * * * *")
+    public void testEndpoints() {
+        // 단일 케이스 테스트
+//        testCase("2");
+
+        // 전체 케이스 테스트 (병렬)
+        Stream.of("1", "2", "3")
+                .parallel()
+                .forEach(this::testCase);
+    }
+
+    private void testCase(String caseNumber) {
+        String circuitName = String.format("CircuitBreakerTestServiceClientcallCase%s", caseNumber);
+        CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(circuitName);
+
+        logCircuitState(caseNumber, circuitBreaker.getState());
+
+        try {
+            ResponseEntity<String> response = switch (caseNumber) {
+                case "1" -> circuitBreakerTestServiceClient.callCase1();
+                case "2" -> circuitBreakerTestServiceClient.callCase2();
+                default -> circuitBreakerTestServiceClient.callCase3();
+            };
+
+            log.info("[Case{}] Response: {}", caseNumber, response.getBody());
+        } catch (Exception ex) {
+            log.error("[Case{}] Waiting for recovery...", caseNumber);
+        }
+    }
+
+    private void logCircuitState(String caseNumber, CircuitBreaker.State state) {
+        String logMessage = String.format("[Case%s] Circuit Breaker State: %s", caseNumber, state);
+
+        switch (state) {
+            case OPEN -> log.error(logMessage);
+            case HALF_OPEN -> log.warn(logMessage);
+            default -> log.info(logMessage);
+        }
+    }
 }
