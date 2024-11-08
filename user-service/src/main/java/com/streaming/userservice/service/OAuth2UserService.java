@@ -5,8 +5,8 @@ import com.streaming.userservice.dto.NaverResponse;
 import com.streaming.userservice.dto.OAuth2Response;
 import com.streaming.userservice.entity.AuthProvider;
 import com.streaming.userservice.entity.User;
-import com.streaming.userservice.repository.UserRepository;
-import com.streaming.userservice.security.CustomOAuth2User;
+import com.streaming.userservice.oauth2.CustomOAuth2User;
+import com.streaming.userservice.service.port.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -18,13 +18,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
-@Slf4j(topic = "OAuth2 유저 정보")
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
 
+    /**
+     * OAuth2 인증 성공 후, 사용자 정보를 로드하고 처리
+     * 신규 회원은 등록하고, 기존 회원은 조회하여 인증 정보 반환
+     *
+     * @param userRequest Provider로 부터 받은 사용자 인증 정보 (OAuth2UserRequest)
+     * @return CustomOAuth2User (사용자 인증 정보)
+     */
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {

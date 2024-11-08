@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-@Slf4j(topic = "조회수 & 광고 정산")
+@Slf4j
 @Service
 public class RevenueCalculatorService {
 

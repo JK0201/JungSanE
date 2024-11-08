@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Slf4j(topic = "유저 영상 시청")
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserPlaybackService {

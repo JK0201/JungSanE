@@ -1,10 +1,11 @@
 package com.streaming.userservice.service;
 
 import com.streaming.common.exception.InvalidTokenException;
-import com.streaming.userservice.config.JwtUtil;
+import com.streaming.userservice.config.security.JwtUtil;
+import com.streaming.userservice.controller.port.AuthCommandService;
 import com.streaming.userservice.dto.TokenWrapper;
 import com.streaming.userservice.entity.RefreshToken;
-import com.streaming.userservice.repository.RefreshTokenRepository;
+import com.streaming.userservice.service.port.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.HttpHeaders;
@@ -13,14 +14,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import static com.streaming.common.constant.JwtConstant.*;
+import static com.streaming.userservice.config.security.JwtUtil.*;
 
-@Slf4j(topic = "JWT Token 재발급")
+@Slf4j
 @Service
 @RequiredArgsConstructor
-public class AuthCommandService {
+public class AuthCommandServiceImpl implements AuthCommandService {
 
     private final JwtUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -34,7 +34,6 @@ public class AuthCommandService {
      * @param refreshToken (String)
      * @return TokenWrapper
      */
-    @Transactional
     public TokenWrapper reissueToken(String refreshToken) {
         try {
             Claims claims = jwtUtil.validateAndExtractClaims(refreshToken);
@@ -74,7 +73,6 @@ public class AuthCommandService {
      * @param refreshToken (String)
      * @param response     (HttpServletResponse)
      */
-    @Transactional
     public void logout(String refreshToken, HttpServletResponse response) {
         if (refreshToken != null && !refreshToken.trim().isEmpty()) {
             // DB에서 Refresh Token 제거

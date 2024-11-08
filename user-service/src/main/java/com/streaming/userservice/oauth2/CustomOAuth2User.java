@@ -1,4 +1,4 @@
-package com.streaming.userservice.security;
+package com.streaming.userservice.oauth2;
 
 import com.streaming.userservice.entity.User;
 import lombok.RequiredArgsConstructor;

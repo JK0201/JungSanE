@@ -1,8 +1,8 @@
-package com.streaming.userservice.security;
+package com.streaming.userservice.oauth2;
 
-import com.streaming.userservice.config.JwtUtil;
+import com.streaming.userservice.config.security.JwtUtil;
 import com.streaming.userservice.entity.RefreshToken;
-import com.streaming.userservice.repository.RefreshTokenRepository;
+import com.streaming.userservice.service.port.RefreshTokenRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,9 +22,9 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Iterator;
 
-import static com.streaming.common.constant.JwtConstant.REFRESH_TOKEN_EXPIRY_TIME;
+import static com.streaming.userservice.config.security.JwtUtil.REFRESH_TOKEN_EXPIRY_TIME;
 
-@Slf4j(topic = "로그인 인증 성공")
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
@@ -35,6 +35,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     @Value("${spring.base.url}")
     private String REDIRECT_URL;
 
+    /**
+     * 소셜 로그인 인증 성공 후, Refresh Token을 생성하고 관리
+     * 1. Refresh Token을 생성하여 DB에 저장
+     * 2. 생성된 Token을 Cookie에 저장
+     * 3. Gateway Service로 반환
+     */
     @Override
     @Transactional
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {

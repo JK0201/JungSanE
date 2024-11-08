@@ -1,44 +1,65 @@
-version: '3'
+version: '3.4'
+
+# Common Variables
+x-common-variables: &common_variables
+  POSTGRESQL_POSTGRES_PASSWORD: adminpassword
+  POSTGRESQL_USERNAME: myuser
+  POSTGRESQL_PASSWORD: mypassword
+  POSTGRESQL_DATABASE: settlement
+  REPMGR_PASSWORD: repmgrpassword
+  REPMGR_PRIMARY_PORT: 5432
+  REPMGR_PORT_NUMBER: 5432
+
+# Health Check
+x-health-check: &health_check
+  healthcheck:
+    test: >
+      CMD-SHELL pg_isready 
+      -U $${POSTGRESQL_USERNAME}
+      -d $${POSTGRESQL_DATABASE}
+    interval: 5s
+    retries: 10
+
 services:
-  settlement-mysql:
-    image: mysql:8.4.2
+  # User Service DBs
+  postgres-user-primary-0:
+    image: bitnami/postgresql-repmgr:15
     ports:
-      - 3307:3306
-    networks:
-      - settlement
+      - "5432:5432"
+    volumes:
+      - postgres_user_primary_data:/bitnami/postgresql
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -password && sleep 5"]
-      interval: 5s
-      retries: 10
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 256M
+      <<: *common_variables
+      REPMGR_PRIMARY_HOST: postgres-user-primary-0
+      REPMGR_NODE_NAME: postgres-user-primary-0
+      REPMGR_NODE_NETWORK_NAME: postgres-user-primary-0
+      REPMGR_PARTNER_NODES: postgres-user-primary-0,postgres-user-standby-1:5432
+    networks:
+      - user_network
+    <<: *health_check
     restart: always
 
-  settlement-backend:
-    build: .
-    image: settlement:1.0.0-compose
+  postgres-user-standby-1:
+    image: bitnami/postgresql-repmgr:15
     ports:
-      - 80:8080
-    networks:
-      - settlement
+      - "5433:5432"
+    volumes:
+      - postgres_user_standby_data:/bitnami/postgresql
     environment:
-      - DB_URL=${DB_URL}
-      - DB_PORT=${DB_PORT}
-    depends_on:
-      settlement-mysql:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          cpus: '1.5'
-          memory: 512M
-    restart: on-failure
+      <<: *common_variables
+      REPMGR_PRIMARY_HOST: postgres-user-primary-0
+      REPMGR_NODE_NAME: postgres-user-standby-1
+      REPMGR_NODE_NETWORK_NAME: postgres-user-standby-1
+      REPMGR_PARTNER_NODES: postgres-user-primary-0,postgres-user-standby-1:5432
+    networks:
+      - user_network
+    <<: *health_check
+    restart: always
+
+volumes:
+  postgres_user_primary_data:
+  postgres_user_standby_data:
 
 networks:
-  settlement:
+  user_network:
+  app_network:

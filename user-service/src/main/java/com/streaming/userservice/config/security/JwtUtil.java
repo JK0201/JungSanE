@@ -1,4 +1,4 @@
-package com.streaming.userservice.config;
+package com.streaming.userservice.config.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -14,9 +14,7 @@ import java.time.ZoneId;
 import java.util.Base64;
 import java.util.Date;
 
-import static com.streaming.common.constant.JwtConstant.*;
-
-@Slf4j(topic = " 토큰 Provider")
+@Slf4j
 @Component
 public class JwtUtil {
 
@@ -26,6 +24,15 @@ public class JwtUtil {
         byte[] decodedKey = Base64.getDecoder().decode(secret);
         secretKey = new SecretKeySpec(decodedKey, "HmacSHA256");
     }
+
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String REFRESH_TOKEN = "refresh_token";
+    public static final String GRANT_TYPE = "grant_type";
+    public static final String CLAIM_USER_ID = "user_id";
+    public static final String CLAIM_ROLE = "role";
+    // FIXME 토큰 시간 변경 요망
+    public static final Long ACCESS_TOKEN_EXPIRY_TIME = 864000000L; // Access Token 10mins
+    public static final Long REFRESH_TOKEN_EXPIRY_TIME = 864000000L; // Refresh Token 24hrs
 
     /**
      * Access Token 생성
@@ -84,7 +91,7 @@ public class JwtUtil {
                 .sameSite("Lax")
                 .build();
     }
-    
+
     /**
      * 토큰 검증 후, 사용자 정보 추출,
      *

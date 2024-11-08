@@ -7,11 +7,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.stream.Stream;
 
 @Slf4j
 @RestController
@@ -41,17 +38,16 @@ public class CircuitBreakerTestController {
      * 1초마다 Adjustment Service에 있는
      * ErrorfulController에 요청
      */
-    @Scheduled(cron = "* * * * * *")
-    public void testEndpoints() {
-        // 단일 케이스 테스트
+//    @Scheduled(cron = "* * * * * *")
+//    public void testEndpoints() {
+//        // 단일 케이스 테스트
 //        testCase("2");
-
-        // 전체 케이스 테스트 (병렬)
-        Stream.of("1", "2", "3")
-                .parallel()
-                .forEach(this::testCase);
-    }
-
+//
+//        // N개 케이스 테스트
+//        Stream.of("1", "2", "3")
+//                .parallel()
+//                .forEach(this::testCase);
+//    }
     private void testCase(String caseNumber) {
         String circuitName = String.format("CircuitBreakerTestServiceClientcallCase%s", caseNumber);
         CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(circuitName);

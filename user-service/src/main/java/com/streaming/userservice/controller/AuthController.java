@@ -1,8 +1,8 @@
 package com.streaming.userservice.controller;
 
-import com.streaming.userservice.config.JwtUtil;
+import com.streaming.userservice.config.security.JwtUtil;
+import com.streaming.userservice.controller.port.AuthCommandService;
 import com.streaming.userservice.dto.TokenWrapper;
-import com.streaming.userservice.service.AuthCommandService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.HttpHeaders;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import static com.streaming.common.constant.JwtConstant.*;
+import static com.streaming.userservice.config.security.JwtUtil.*;
 
 @RestController
 @RequiredArgsConstructor
