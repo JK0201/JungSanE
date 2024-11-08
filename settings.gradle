@@ -1,0 +1,9 @@
+rootProject.name = 'settlement'
+
+include 'common'
+include 'user-service'
+include 'video-service'
+include 'adjustment-service'
+
+include 'eureka-server'
+include 'gateway-service'

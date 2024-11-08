@@ -1,0 +1,65 @@
+version: '3.4'
+
+# Common Variables
+x-common-variables: &common_variables
+  POSTGRESQL_POSTGRES_PASSWORD: adminpassword
+  POSTGRESQL_USERNAME: myuser
+  POSTGRESQL_PASSWORD: mypassword
+  POSTGRESQL_DATABASE: settlement
+  REPMGR_PASSWORD: repmgrpassword
+  REPMGR_PRIMARY_PORT: 5432
+  REPMGR_PORT_NUMBER: 5432
+
+# Health Check
+x-health-check: &health_check
+  healthcheck:
+    test: >
+      CMD-SHELL pg_isready 
+      -U $${POSTGRESQL_USERNAME}
+      -d $${POSTGRESQL_DATABASE}
+    interval: 5s
+    retries: 10
+
+services:
+  # User Service DBs
+  postgres-user-primary-0:
+    image: bitnami/postgresql-repmgr:15
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_user_primary_data:/bitnami/postgresql
+    environment:
+      <<: *common_variables
+      REPMGR_PRIMARY_HOST: postgres-user-primary-0
+      REPMGR_NODE_NAME: postgres-user-primary-0
+      REPMGR_NODE_NETWORK_NAME: postgres-user-primary-0
+      REPMGR_PARTNER_NODES: postgres-user-primary-0,postgres-user-standby-1:5432
+    networks:
+      - user_network
+    <<: *health_check
+    restart: always
+
+  postgres-user-standby-1:
+    image: bitnami/postgresql-repmgr:15
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_user_standby_data:/bitnami/postgresql
+    environment:
+      <<: *common_variables
+      REPMGR_PRIMARY_HOST: postgres-user-primary-0
+      REPMGR_NODE_NAME: postgres-user-standby-1
+      REPMGR_NODE_NETWORK_NAME: postgres-user-standby-1
+      REPMGR_PARTNER_NODES: postgres-user-primary-0,postgres-user-standby-1:5432
+    networks:
+      - user_network
+    <<: *health_check
+    restart: always
+
+volumes:
+  postgres_user_primary_data:
+  postgres_user_standby_data:
+
+networks:
+  user_network:
+  app_network:
