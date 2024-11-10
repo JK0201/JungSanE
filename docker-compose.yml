@@ -1,6 +1,6 @@
 version: '3.4'
 
-# Common Variables
+### Common Variables
 x-common-variables: &common_variables
   POSTGRESQL_POSTGRES_PASSWORD: adminpassword
   POSTGRESQL_USERNAME: myuser
@@ -10,8 +10,8 @@ x-common-variables: &common_variables
   REPMGR_PRIMARY_PORT: 5432
   REPMGR_PORT_NUMBER: 5432
 
-# Health Check
-x-health-check: &health_check
+### DB Health Check
+x-db-health-check: &db_health_check
   healthcheck:
     test: >
       CMD-SHELL pg_isready 
@@ -20,8 +20,18 @@ x-health-check: &health_check
     interval: 5s
     retries: 10
 
+### Redis Health Check
+x-redis-health-check: &redis_health_check
+  healthcheck:
+    test: >
+      CMD
+      redis-cli
+      ping
+    interval: 5s
+    retries: 10
+
 services:
-  # User Service DBs
+  ### User Service DBs
   postgres-user-primary-0:
     image: bitnami/postgresql-repmgr:15
     ports:
@@ -36,7 +46,7 @@ services:
       REPMGR_PARTNER_NODES: postgres-user-primary-0,postgres-user-standby-1:5432
     networks:
       - user_network
-    <<: *health_check
+    <<: *db_health_check
     restart: always
 
   postgres-user-standby-1:
@@ -53,13 +63,59 @@ services:
       REPMGR_PARTNER_NODES: postgres-user-primary-0,postgres-user-standby-1:5432
     networks:
       - user_network
-    <<: *health_check
+    <<: *db_health_check
     restart: always
+
+  ### Video Service DBs
+  postgres-video-primary-0:
+    image: bitnami/postgresql-repmgr:15
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_video_primary_data:/bitnami/postgresql
+    environment:
+      <<: *common_variables
+      REPMGR_PRIMARY_HOST: postgres-video-primary-0
+      REPMGR_NODE_NAME: postgres-video-primary-0
+      REPMGR_NODE_NETWORK_NAME: postgres-video-primary-0
+      REPMGR_PARTNER_NODES: postgres-video-primary-0,postgres-video-standby-1:5432
+    networks:
+      - video_network
+    <<: *db_health_check
+    restart: always
+
+  postgres-video-standby-1:
+    image: bitnami/postgresql-repmgr:15
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_video_standby_data:/bitnami/postgresql
+    environment:
+      <<: *common_variables
+      REPMGR_PRIMARY_HOST: postgres-video-primary-0
+      REPMGR_NODE_NAME: postgres-video-standby-1
+      REPMGR_NODE_NETWORK_NAME: postgres-video-standby-1
+      REPMGR_PARTNER_NODES: postgres-video-primary-0,postgres-video-standby-1:5432
+    networks:
+      - video_network
+    <<: *db_health_check
+    restart: always
+
+  ### Video-Service Redis
+  cache-server:
+    image: redis
+    ports:
+      - "6379:6379"
+    <<: *redis_health_check
+    networks:
+      - video_network
 
 volumes:
   postgres_user_primary_data:
   postgres_user_standby_data:
-
+  postgres_video_primary_data:
+  postgres_video_standby_data:
 networks:
   user_network:
+  video_network:
   app_network:
