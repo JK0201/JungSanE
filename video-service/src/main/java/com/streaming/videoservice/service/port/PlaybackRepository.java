@@ -1,6 +1,6 @@
 package com.streaming.videoservice.service.port;
 
-import com.streaming.videoservice.entity.Playback;
+import com.streaming.videoservice.entity.playback.Playback;
 
 import java.util.Optional;
 

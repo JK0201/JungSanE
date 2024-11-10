@@ -1,4 +1,4 @@
-package com.streaming.videoservice.entity;
+package com.streaming.videoservice.entity.video;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

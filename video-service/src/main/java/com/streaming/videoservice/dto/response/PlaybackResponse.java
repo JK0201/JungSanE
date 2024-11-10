@@ -1,7 +1,7 @@
 package com.streaming.videoservice.dto.response;
 
-import com.streaming.videoservice.entity.Playback;
-import com.streaming.videoservice.entity.PlaybackStatus;
+import com.streaming.videoservice.entity.playback.Playback;
+import com.streaming.videoservice.entity.playback.PlaybackStatus;
 import lombok.Builder;
 import lombok.Getter;
 

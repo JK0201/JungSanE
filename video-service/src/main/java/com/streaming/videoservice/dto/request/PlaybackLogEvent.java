@@ -1,7 +1,7 @@
 package com.streaming.videoservice.dto.request;
 
-import com.streaming.videoservice.entity.PlaybackStatus;
-import com.streaming.videoservice.entity.Video;
+import com.streaming.videoservice.entity.playback.PlaybackStatus;
+import com.streaming.videoservice.entity.video.Video;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -25,7 +25,7 @@ public class PlaybackLogEvent {
                 .uploaderId(video.getUploaderId())
                 .videoPlayedTime(playedTime)
                 .advertisementViewCount(advertisementViewCount)
-                .isNewView(status == PlaybackStatus.PROGRESS)
+                .isNewView(status == PlaybackStatus.PROGRESS) // 추후 배치 작업시 : true -> 조회수 포함 / false -> 조회수 미포함
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .build();

@@ -1,7 +1,7 @@
 package com.streaming.videoservice.repository.video;
 
-import com.streaming.videoservice.entity.Video;
-import com.streaming.videoservice.entity.VideoStatus;
+import com.streaming.videoservice.entity.video.Video;
+import com.streaming.videoservice.entity.video.VideoStatus;
 import com.streaming.videoservice.service.port.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

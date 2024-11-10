@@ -1,6 +1,6 @@
 package com.streaming.videoservice.repository.playback;
 
-import com.streaming.videoservice.entity.Playback;
+import com.streaming.videoservice.entity.playback.Playback;
 import com.streaming.videoservice.service.port.PlaybackRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

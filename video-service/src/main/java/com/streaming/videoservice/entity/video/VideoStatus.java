@@ -1,4 +1,4 @@
-package com.streaming.videoservice.entity;
+package com.streaming.videoservice.entity.video;
 
 public enum VideoStatus {
     ACTIVE("STATUS_ACTIVE"), // 시청 가능 동영상 (공개)

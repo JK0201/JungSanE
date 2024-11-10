@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -26,6 +27,7 @@ public class JpaConfig {
      * @param entityPackage (Entity 스캔 패키지 경로 - application.yml 설정)
      */
     @Bean
+    @Primary
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
             @Qualifier("dataSource") DataSource dataSource,
             @Value("${spring.jpa.entity-package}") String entityPackage

@@ -1,4 +1,4 @@
-package com.streaming.videoservice.entity;
+package com.streaming.videoservice.entity.playback;
 
 import lombok.Getter;
 

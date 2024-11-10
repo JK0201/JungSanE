@@ -1,4 +1,4 @@
-package com.streaming.videoservice.entity;
+package com.streaming.videoservice.entity.video;
 
 import com.streaming.common.entity.Timestamped;
 import com.streaming.videoservice.dto.request.VideoPublish;

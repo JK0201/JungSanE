@@ -1,6 +1,7 @@
-package com.streaming.videoservice.entity;
+package com.streaming.videoservice.entity.playback;
 
 import com.streaming.common.entity.Timestamped;
+import com.streaming.videoservice.entity.video.Video;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
