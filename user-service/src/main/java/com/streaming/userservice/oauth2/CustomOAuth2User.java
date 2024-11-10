@@ -1,6 +1,6 @@
 package com.streaming.userservice.oauth2;
 
-import com.streaming.userservice.entity.User;
+import com.streaming.userservice.entity.user.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -1,10 +1,10 @@
 package com.streaming.userservice.service;
 
-import com.streaming.userservice.dto.GoogleResponse;
-import com.streaming.userservice.dto.NaverResponse;
-import com.streaming.userservice.dto.OAuth2Response;
-import com.streaming.userservice.entity.AuthProvider;
-import com.streaming.userservice.entity.User;
+import com.streaming.userservice.dto.response.GoogleResponse;
+import com.streaming.userservice.dto.response.NaverResponse;
+import com.streaming.userservice.dto.response.OAuth2Response;
+import com.streaming.userservice.entity.user.AuthProvider;
+import com.streaming.userservice.entity.user.User;
 import com.streaming.userservice.oauth2.CustomOAuth2User;
 import com.streaming.userservice.service.port.UserRepository;
 import lombok.RequiredArgsConstructor;

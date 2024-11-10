@@ -1,6 +1,6 @@
 package com.streaming.userservice.service.port;
 
-import com.streaming.userservice.entity.RefreshToken;
+import com.streaming.userservice.entity.token.RefreshToken;
 
 import java.util.Optional;
 

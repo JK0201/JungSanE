@@ -1,6 +1,6 @@
 package com.streaming.userservice.controller.port;
 
-import com.streaming.userservice.dto.TokenWrapper;
+import com.streaming.userservice.dto.response.TokenWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.transaction.annotation.Transactional;
 

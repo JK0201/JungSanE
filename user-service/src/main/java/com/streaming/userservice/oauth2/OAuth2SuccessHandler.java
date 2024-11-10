@@ -1,7 +1,7 @@
 package com.streaming.userservice.oauth2;
 
 import com.streaming.userservice.config.security.JwtUtil;
-import com.streaming.userservice.entity.RefreshToken;
+import com.streaming.userservice.entity.token.RefreshToken;
 import com.streaming.userservice.service.port.RefreshTokenRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

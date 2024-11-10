@@ -1,4 +1,4 @@
-package com.streaming.userservice.dto;
+package com.streaming.userservice.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;

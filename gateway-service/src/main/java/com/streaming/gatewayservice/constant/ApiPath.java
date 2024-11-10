@@ -5,6 +5,10 @@ import java.util.Map;
 import java.util.Set;
 
 public class ApiPath {
+
+    // Token Reissue
+    public static final String REISSUE_URI = "/auth/v1/reissue";
+
     // API Gateway
     public static class GatewayPath {
         public static final String USER_SERVICE = "/user-service/**";

@@ -1,7 +1,7 @@
 package com.streaming.userservice.service.port;
 
-import com.streaming.userservice.entity.AuthProvider;
-import com.streaming.userservice.entity.User;
+import com.streaming.userservice.entity.user.AuthProvider;
+import com.streaming.userservice.entity.user.User;
 
 import java.util.Optional;
 

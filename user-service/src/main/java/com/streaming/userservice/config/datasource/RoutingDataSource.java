@@ -22,9 +22,9 @@ public class RoutingDataSource extends AbstractRoutingDataSource {
         boolean isReadOnly = TransactionSynchronizationManager.isCurrentTransactionReadOnly();
 
         if (isReadOnly) {
-            log.info("[{}] Using READ DB [Port : 5432]", serviceName);
+            log.info("[{}] Using READ DB [Port : 5433]", serviceName);
         } else {
-            log.info("[{}] Using WRITE DB [Port : 5433]", serviceName);
+            log.info("[{}] Using WRITE DB [Port : 5432]", serviceName);
         }
 
         return isReadOnly ? "read" : "write";

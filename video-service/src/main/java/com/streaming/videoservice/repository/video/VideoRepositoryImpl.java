@@ -1,7 +1,8 @@
-package com.streaming.videoservice.repository;
+package com.streaming.videoservice.repository.video;
 
 import com.streaming.videoservice.entity.Video;
 import com.streaming.videoservice.entity.VideoStatus;
+import com.streaming.videoservice.service.port.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -13,13 +14,17 @@ public class VideoRepositoryImpl implements VideoRepository {
 
     private final VideoJpaRepository videoJpaRepository;
 
-    @Override
-    public Video save(Video video) {
-        return videoJpaRepository.save(video);
-    }
-
+    // READ
     @Override
     public Optional<Video> findByIdAndStatus(Long videoId, VideoStatus videoStatus) {
         return videoJpaRepository.findByIdAndStatus(videoId, videoStatus);
     }
+
+    // CUD
+    @Override
+    public void save(Video video) {
+        videoJpaRepository.save(video);
+    }
+
+
 }

@@ -1,4 +1,4 @@
-package com.streaming.videoservice.dto;
+package com.streaming.videoservice.dto.request;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

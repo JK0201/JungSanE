@@ -17,14 +17,7 @@ import java.util.Date;
 @Slf4j
 @Component
 public class JwtUtil {
-
-    private final SecretKey secretKey;
-
-    public JwtUtil(@Value("${spring.jwt.secret.key}") String secret) {
-        byte[] decodedKey = Base64.getDecoder().decode(secret);
-        secretKey = new SecretKeySpec(decodedKey, "HmacSHA256");
-    }
-
+    
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String REFRESH_TOKEN = "refresh_token";
     public static final String GRANT_TYPE = "grant_type";
@@ -33,6 +26,13 @@ public class JwtUtil {
     // FIXME 토큰 시간 변경 요망
     public static final Long ACCESS_TOKEN_EXPIRY_TIME = 864000000L; // Access Token 10mins
     public static final Long REFRESH_TOKEN_EXPIRY_TIME = 864000000L; // Refresh Token 24hrs
+
+    private final SecretKey secretKey;
+
+    public JwtUtil(@Value("${spring.jwt.secret.key}") String secret) {
+        byte[] decodedKey = Base64.getDecoder().decode(secret);
+        secretKey = new SecretKeySpec(decodedKey, "HmacSHA256");
+    }
 
     /**
      * Access Token 생성

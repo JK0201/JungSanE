@@ -1,6 +1,6 @@
 package com.streaming.userservice.repository.token;
 
-import com.streaming.userservice.entity.RefreshToken;
+import com.streaming.userservice.entity.token.RefreshToken;
 import com.streaming.userservice.service.port.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

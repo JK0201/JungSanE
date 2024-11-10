@@ -1,7 +1,7 @@
 package com.streaming.videoservice.entity;
 
 import com.streaming.common.entity.Timestamped;
-import com.streaming.videoservice.dto.VideoPublish;
+import com.streaming.videoservice.dto.request.VideoPublish;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -36,9 +36,6 @@ public class Video extends Timestamped {
     @Column(nullable = false)
     private Long accumulatedViewCount;
 
-    @Column(nullable = false)
-    private Long accumulatedPlaybackTime;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private VideoStatus status;
@@ -52,7 +49,6 @@ public class Video extends Timestamped {
         video.description = videoPublish.getDescription();
         video.playbackTime = videoPublish.getPlaybackTime();
         video.accumulatedViewCount = 0L;
-        video.accumulatedPlaybackTime = 0L;
         video.status = VideoStatus.ACTIVE;
         video.uploaderId = userId;
         return video;
@@ -68,10 +64,6 @@ public class Video extends Timestamped {
 
     public void incrementAccumulatedViewCount() {
         this.accumulatedViewCount++;
-    }
-
-    public void addAccumulatedPlaybackTime(Long playedTime) {
-        this.accumulatedPlaybackTime += playedTime;
     }
 
     /**

@@ -1,7 +1,7 @@
 package com.streaming.userservice.repository.user;
 
-import com.streaming.userservice.entity.AuthProvider;
-import com.streaming.userservice.entity.User;
+import com.streaming.userservice.entity.user.AuthProvider;
+import com.streaming.userservice.entity.user.User;
 import com.streaming.userservice.service.port.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

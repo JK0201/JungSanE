@@ -2,7 +2,7 @@ package com.streaming.userservice.controller;
 
 import com.streaming.userservice.config.security.JwtUtil;
 import com.streaming.userservice.controller.port.AuthCommandService;
-import com.streaming.userservice.dto.TokenWrapper;
+import com.streaming.userservice.dto.response.TokenWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.HttpHeaders;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import static com.streaming.userservice.config.security.JwtUtil.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth/v2")
+@RequestMapping("/auth/v1")
 public class AuthController {
 
     private final AuthCommandService authCommandService;

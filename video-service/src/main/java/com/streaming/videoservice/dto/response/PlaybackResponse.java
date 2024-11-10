@@ -1,6 +1,7 @@
-package com.streaming.videoservice.dto;
+package com.streaming.videoservice.dto.response;
 
 import com.streaming.videoservice.entity.Playback;
+import com.streaming.videoservice.entity.PlaybackStatus;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -11,18 +12,18 @@ import java.time.LocalDateTime;
 public class PlaybackResponse {
 
     private final Long id;
+    private final Long userId;
     private final Long lastPlayPosition;
-    //    private final User user;
-//    private final Video video;
+    private final PlaybackStatus status;
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 
     public static PlaybackResponse from(Playback playback) {
         return PlaybackResponse.builder()
                 .id(playback.getId())
+                .userId(playback.getUserId())
                 .lastPlayPosition(playback.getLastPlayPosition())
-//                .user(playback.getUser())
-//                .video(playback.getVideo())
+                .status(playback.getStatus())
                 .createdAt(playback.getCreatedAt())
                 .modifiedAt(playback.getModifiedAt())
                 .build();

@@ -21,33 +21,40 @@ public class Playback extends Timestamped {
     private Long userId;
 
     @Column(nullable = false)
-    private Long videoPlayedTime;
-
-    @Column(nullable = false)
     private Long lastPlayPosition;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Long advertisementViewCount;
+    private PlaybackStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "video_id")
     private Video video;
 
-    public static Playback createUserPlayback(Long lastPlayPosition, Long userId, Video video) {
+    public static Playback createPlayback(Long userId, Video video) {
         Playback playback = new Playback();
-        playback.videoPlayedTime = 0L;
-        playback.lastPlayPosition = lastPlayPosition;
-        playback.advertisementViewCount = 0L;
         playback.userId = userId;
+        playback.lastPlayPosition = 0L;
+        playback.status = PlaybackStatus.PROGRESS; // 추후 배치 작업시 : true -> 조회수 포함, false -> 조회수 미포함
         playback.video = video;
         return playback;
     }
 
-    public void updateVideoPlayedTime(Long videoPlayedTime) {
-        this.videoPlayedTime = videoPlayedTime;
+    /**
+     * 유저 마지막 재생 시간 업데이트
+     *
+     * @param position (Long)
+     */
+    public void updateLastPosition(Long position) {
+        this.lastPlayPosition = position;
     }
 
-    public void incrementAdvertisementViewCount() {
-        this.advertisementViewCount++;
+    /**
+     * 유저 영상 재생 상태 업데이트
+     *
+     * @param status (PlaybackStatus)
+     */
+    public void updateStatus(PlaybackStatus status) {
+        this.status = status;
     }
 }

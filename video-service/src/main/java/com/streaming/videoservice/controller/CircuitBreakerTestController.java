@@ -1,6 +1,6 @@
 package com.streaming.videoservice.controller;
 
-import com.streaming.videoservice.client.CircuitBreakerTestServiceClient;
+import com.streaming.videoservice.config.open_feign.circuit.CircuitBreakerTestServiceClient;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import lombok.RequiredArgsConstructor;
@@ -40,10 +40,10 @@ public class CircuitBreakerTestController {
      */
 //    @Scheduled(cron = "* * * * * *")
 //    public void testEndpoints() {
-//        // 단일 케이스 테스트
+//        // 단일 케이스
 //        testCase("2");
 //
-//        // N개 케이스 테스트
+//        // N개 케이스
 //        Stream.of("1", "2", "3")
 //                .parallel()
 //                .forEach(this::testCase);

@@ -1,4 +1,4 @@
-package com.streaming.videoservice.client;
+package com.streaming.videoservice.config.open_feign.circuit;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
@@ -29,6 +29,12 @@ public class CircuitBreakerTestServiceFallback implements CircuitBreakerTestServ
         return handleFallback("3");
     }
 
+    /**
+     * 요청 실패시 실행할 Fallback 메서드
+     *
+     * @param caseNumber (String)
+     * @return ResponseEntity
+     */
     private ResponseEntity<String> handleFallback(String caseNumber) {
         String circuitName = String.format("CircuitBreakerTestServiceClientcallCase%s", caseNumber);
         CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(circuitName);

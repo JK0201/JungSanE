@@ -1,13 +1,15 @@
-package com.streaming.videoservice.repository;
+package com.streaming.videoservice.repository.video;
 
 import com.streaming.videoservice.entity.Video;
 import com.streaming.videoservice.entity.VideoStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface VideoRepository {
+public interface VideoJpaRepository extends JpaRepository<Video, Long> {
 
-    Video save(Video video);
-
+    // READ
     Optional<Video> findByIdAndStatus(Long videoId, VideoStatus videoStatus);
+
+    // CUD
 }

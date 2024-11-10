@@ -1,4 +1,4 @@
-package com.streaming.userservice.dto;
+package com.streaming.userservice.dto.response;
 
 public interface OAuth2Response {
 

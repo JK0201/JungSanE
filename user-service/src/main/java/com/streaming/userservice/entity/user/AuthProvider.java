@@ -1,4 +1,4 @@
-package com.streaming.userservice.entity;
+package com.streaming.userservice.entity.user;
 
 import lombok.Getter;
 

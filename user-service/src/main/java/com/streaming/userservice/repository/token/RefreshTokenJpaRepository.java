@@ -1,6 +1,6 @@
 package com.streaming.userservice.repository.token;
 
-import com.streaming.userservice.entity.RefreshToken;
+import com.streaming.userservice.entity.token.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

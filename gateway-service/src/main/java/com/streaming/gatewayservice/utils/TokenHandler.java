@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+import static com.streaming.gatewayservice.constant.ApiPath.REISSUE_URI;
 import static com.streaming.gatewayservice.constant.JwtConstant.JwtToken.*;
 import static com.streaming.gatewayservice.constant.JwtConstant.RequestHeader.USER_ID_HEADER;
 
@@ -56,7 +57,7 @@ public class TokenHandler {
      */
     public Mono<Void> reissue(ServerWebExchange exchange, GatewayFilterChain chain, String refreshToken) {
         return userServiceWebClient.post()
-                .uri("/auth/v2/reissue")
+                .uri(REISSUE_URI)
                 .cookie(REFRESH_TOKEN, refreshToken)
                 .retrieve()
                 .toEntity(Void.class)

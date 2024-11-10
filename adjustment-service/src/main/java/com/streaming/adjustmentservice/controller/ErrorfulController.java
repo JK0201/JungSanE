@@ -1,6 +1,7 @@
 package com.streaming.adjustmentservice.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,10 +20,14 @@ public class ErrorfulController {
 
         // Simulate 5% chance of 500 error
         if (new Random().nextInt(100) < 5) {
-            return ResponseEntity.status(500).body("Internal Server Error");
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal Server Error");
         }
 
-        return ResponseEntity.ok("Normal response");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Normal response");
     }
 
     // 매분 첫 10초 딜레이 테스트
@@ -41,10 +46,14 @@ public class ErrorfulController {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            return ResponseEntity.status(503).body("Service Unavailable");
+            return ResponseEntity
+                    .status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body("Service Unavailable");
         }
 
-        return ResponseEntity.ok("Normal response");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Normal response");
     }
 
     // 매분 첫 10초 500에러 테스트
@@ -57,9 +66,13 @@ public class ErrorfulController {
         int currentSecond = currentTime.getSecond();
 
         if (currentSecond < 10) {
-            return ResponseEntity.status(500).body("Internal Server Error");
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Internal Server Error");
         }
 
-        return ResponseEntity.ok("Normal response");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Normal response");
     }
 }

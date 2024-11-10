@@ -1,7 +1,7 @@
-package com.streaming.userservice.entity;
+package com.streaming.userservice.entity.user;
 
 import com.streaming.common.entity.Timestamped;
-import com.streaming.userservice.dto.OAuth2Response;
+import com.streaming.userservice.dto.response.OAuth2Response;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -35,30 +35,12 @@ public class User extends Timestamped {
     @Column(nullable = false)
     private AuthProvider authProvider;
 
-    public static User fromTest(String email, String username, String nickname) {
-        User user = new User();
-        user.email = email;
-        user.username = username;
-        user.nickname = nickname;
-        user.role = UserRole.USER;
-        user.authProvider = AuthProvider.GOOGLE;
-        return user;
-    }
-
     public static User fromOAuth(String username, OAuth2Response oAuth2Response, AuthProvider authProvider) {
         User user = new User();
         user.email = oAuth2Response.getEmail();
         user.username = username;
         user.nickname = oAuth2Response.getName();
         user.role = UserRole.UPLOADER; // FIXME 테스트 후 권한 설정 변경
-        user.authProvider = authProvider;
-        return user;
-    }
-
-    public static User fromToken(String username, UserRole userRole, AuthProvider authProvider) {
-        User user = new User();
-        user.username = username;
-        user.role = userRole;
         user.authProvider = authProvider;
         return user;
     }

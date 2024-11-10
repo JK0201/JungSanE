@@ -1,4 +1,4 @@
-package com.streaming.userservice.entity;
+package com.streaming.userservice.entity.token;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -35,6 +35,12 @@ public class RefreshToken {
         return refreshToken;
     }
 
+    /**
+     * 새로 발급 받은 토큰으로 업데이트
+     *
+     * @param newRefreshToken 새로 발급 받은 토큰 (String)
+     * @param expiryTime      만료 시간 (String)
+     */
     public void update(String newRefreshToken, LocalDateTime expiryTime) {
         this.refreshToken = newRefreshToken;
         this.expiryTime = expiryTime;
