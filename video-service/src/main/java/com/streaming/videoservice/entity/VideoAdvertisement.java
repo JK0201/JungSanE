@@ -34,6 +34,9 @@ public class VideoAdvertisement {
         return videoAdvertisement;
     }
 
+    /**
+     * 영상 누적 조회수 +1 (업데이트)
+     */
     public void addAccumulatedViewCount() {
         this.accumulatedViewCount++;
     }

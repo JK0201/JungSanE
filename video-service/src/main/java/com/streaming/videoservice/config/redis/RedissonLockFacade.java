@@ -20,6 +20,15 @@ public class RedissonLockFacade {
     private final RedissonClient redissonClient;
     private final RedisTemplate<String, String> redisTemplate;
 
+    /**
+     * Redis를 사용한 분산락 처리 메서드
+     *
+     * @param lockKey "lock:video:{videoId}" (String)
+     * @param task    락 획득 후, 실행할 테스크
+     * @param <T>     테스크 반환 타입
+     * @return 테스크 실행 결과
+     * @throws RuntimeException 락 획득 실패 / 테스크 실행 중 인터럽트 발생
+     */
     public <T> T executeWithLock(String lockKey, Supplier<T> task) {
         RLock lock = redissonClient.getLock(lockKey);
 

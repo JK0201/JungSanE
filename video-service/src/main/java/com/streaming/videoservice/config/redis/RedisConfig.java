@@ -21,12 +21,19 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int port;
 
+    /**
+     * Redis 독립 실행형 서버와의 연결을 설정하고 관리하는 팩토리 빈 생성
+     */
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
         return new LettuceConnectionFactory(config);
     }
 
+    /**
+     * Redis 데이터 엑세스를 위한 템플릿 구성
+     * String 타입의 key-value 쌍을 처리하도록 설정
+     */
     @Bean
     public RedisTemplate<String, String> redisTemplate() {
         RedisTemplate<String, String> template = new RedisTemplate<>();
@@ -37,6 +44,9 @@ public class RedisConfig {
         return template;
     }
 
+    /**
+     * Redisson 클라이언트 설정 및 생성 (분산락)
+     */
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
