@@ -4,4 +4,5 @@ public class DatasourceConstant {
 
     public static final String WRITE_DATASOURCE = "writeDataSource";
     public static final String READ_DATASOURCE = "readDataSource";
+    public static final String METADATA_DATASOURCE = "metadataDataSource";
 }

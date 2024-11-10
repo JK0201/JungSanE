@@ -31,7 +31,8 @@ x-redis-health-check: &redis_health_check
     retries: 10
 
 services:
-  ### User Service DBs
+  ### USER SERVICE ###
+  # DBs
   postgres-user-primary-0:
     image: bitnami/postgresql-repmgr:15
     ports:
@@ -66,7 +67,8 @@ services:
     <<: *db_health_check
     restart: always
 
-  ### Video Service DBs
+  ### VIDEO SERVICE ###
+  # DBs
   postgres-video-primary-0:
     image: bitnami/postgresql-repmgr:15
     ports:
@@ -101,7 +103,7 @@ services:
     <<: *db_health_check
     restart: always
 
-  ### Video-Service Redis
+  # Redis
   cache-server:
     image: redis
     ports:
@@ -110,12 +112,71 @@ services:
     networks:
       - video_network
 
+  ### ADJUSTMENT SERVICE ###
+  # DBs
+  postgres-adjustment-primary-0:
+    image: bitnami/postgresql-repmgr:15
+    ports:
+      - "5436:5432"
+    volumes:
+      - postgres_adjustment_primary_data:/bitnami/postgresql
+    environment:
+      <<: *common_variables
+      REPMGR_PRIMARY_HOST: postgres-adjustment-primary-0
+      REPMGR_NODE_NAME: postgres-adjustment-primary-0
+      REPMGR_NODE_NETWORK_NAME: postgres-adjustment-primary-0
+      REPMGR_PARTNER_NODES: postgres-adjustment-primary-0,postgres-adjustment-standby-1:5432
+    networks:
+      - adjustment_network
+    <<: *db_health_check
+    restart: always
+
+  postgres-adjustment-standby-1:
+    image: bitnami/postgresql-repmgr:15
+    ports:
+      - "5437:5432"
+    volumes:
+      - postgres_adjustment_standby_data:/bitnami/postgresql
+    environment:
+      <<: *common_variables
+      REPMGR_PRIMARY_HOST: postgres-adjustment-primary-0
+      REPMGR_NODE_NAME: postgres-adjustment-standby-1
+      REPMGR_NODE_NETWORK_NAME: postgres-adjustment-standby-1
+      REPMGR_PARTNER_NODES: postgres-adjustment-primary-0,postgres-adjustment-standby-1:5432
+    networks:
+      - adjustment_network
+    <<: *db_health_check
+    restart: always
+
+
+  # Meta DB
+  postgres-adjustment-metadata:
+    image: bitnami/postgresql:15
+    ports:
+      - "5438:5432"
+    volumes:
+      - postgres_adjustment_metadata:/bitnami/postgresql
+    environment:
+      POSTGRESQL_POSTGRES_PASSWORD: adminpassword
+      POSTGRESQL_USERNAME: myuser
+      POSTGRESQL_PASSWORD: mypassword
+      POSTGRESQL_DATABASE: settlement
+    networks:
+      - adjustment_network
+    <<: *db_health_check
+    restart: always
+
 volumes:
   postgres_user_primary_data:
   postgres_user_standby_data:
   postgres_video_primary_data:
   postgres_video_standby_data:
+  postgres_adjustment_primary_data:
+  postgres_adjustment_standby_data:
+  postgres_adjustment_metadata:
+
 networks:
   user_network:
   video_network:
+  adjustment_network:
   app_network:

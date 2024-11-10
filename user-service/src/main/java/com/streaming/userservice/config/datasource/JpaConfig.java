@@ -42,9 +42,10 @@ public class JpaConfig {
     }
 
     /**
-     * JPA 트랜젝션 메니저 설정
+     * JPA 트랜젝션 매니저 설정
      */
     @Bean
+    @Primary
     public PlatformTransactionManager transactionManager(
             @Qualifier("entityManagerFactory") LocalContainerEntityManagerFactoryBean entityManagerFactory
     ) {

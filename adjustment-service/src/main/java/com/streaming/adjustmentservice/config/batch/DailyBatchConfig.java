@@ -1,4 +1,4 @@
-package com.streaming.adjustmentservice.config;
+package com.streaming.adjustmentservice.config.batch;
 
 import com.streaming.adjustmentservice.dto.PlaybackSummary;
 import com.streaming.adjustmentservice.dto.SettlementWrapper;
