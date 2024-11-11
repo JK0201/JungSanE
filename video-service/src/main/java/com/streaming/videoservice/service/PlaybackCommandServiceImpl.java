@@ -1,10 +1,10 @@
 package com.streaming.videoservice.service;
 
+import com.streaming.common.dto.PlaybackEvent;
 import com.streaming.common.exception.ResourceNotFoundException;
 import com.streaming.videoservice.config.redis.RedisService;
 import com.streaming.videoservice.config.redis.RedissonLockFacade;
 import com.streaming.videoservice.controller.port.PlaybackCommandService;
-import com.streaming.videoservice.dto.request.PlaybackLogEvent;
 import com.streaming.videoservice.dto.request.VideoStop;
 import com.streaming.videoservice.dto.response.PlaybackResponse;
 import com.streaming.videoservice.entity.playback.Playback;
@@ -16,6 +16,7 @@ import com.streaming.videoservice.service.port.PlaybackRepository;
 import com.streaming.videoservice.service.port.VideoRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,11 +30,13 @@ public class PlaybackCommandServiceImpl implements PlaybackCommandService {
     private static final String ABUSE_PREFIX = "abuse:video:";
     private static final String LOCK_PREFIX = "lock:video:";
     private static final long ABUSE_PREVENTION_SECONDS = 30L;
+    private static final String TOPIC = "playback-logs";
 
     private final PlaybackRepository playbackRepository;
     private final VideoRepository videoRepository;
     private final RedissonLockFacade redissonLockFacade;
     private final RedisService redisService;
+    private final KafkaTemplate<String, PlaybackEvent> kafkaTemplate;
 
     /**
      * 영상 재생 시작 처리
@@ -115,15 +118,18 @@ public class PlaybackCommandServiceImpl implements PlaybackCommandService {
                 // 광고 조회수 계산
                 Long advertisementViewCount = countAdvertisementViews(video, playback.getLastPlayPosition(), currentPosition);
                 // adjustment-service에 보낼 PlaybackLogEvent DTO 객체 생성
-                PlaybackLogEvent event = PlaybackLogEvent.from(
-                        video,
+                PlaybackEvent event = PlaybackEvent.from(
+                        videoId,
+                        video.getUploaderId(),
                         playedTime,
                         advertisementViewCount,
-                        playback.getStatus());
+                        playback.getStatus() == PlaybackStatus.PROGRESS);
 
                 log.info("=== video_id : {} ===", videoId);
                 log.info("광고 조회수 : {}", event.getAdvertisementViewCount());
                 log.info("영상 시청 시간 : {}", event.getVideoPlayedTime());
+
+//                sendToKafka(event);
             }
 
             // 영상을 다 봤다면 유저 시청 위치를 0L로 초기화
@@ -155,4 +161,11 @@ public class PlaybackCommandServiceImpl implements PlaybackCommandService {
         viewedAdvertisements.forEach(VideoAdvertisement::addAccumulatedViewCount);
         return (long) viewedAdvertisements.size();
     }
+
+//    private void sendToKafka(PlaybackEvent event) {
+//        try {
+//            kafkaTemplate.send(TOPIC, event.getVideoId().toString(), event)
+//                    .addCallback()
+//        }
+//    }
 }

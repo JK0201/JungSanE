@@ -1,6 +1,6 @@
 version: '3.4'
 
-### Common Variables
+### Common Variables ###
 x-common-variables: &common_variables
   POSTGRESQL_POSTGRES_PASSWORD: adminpassword
   POSTGRESQL_USERNAME: myuser
@@ -10,27 +10,99 @@ x-common-variables: &common_variables
   REPMGR_PRIMARY_PORT: 5432
   REPMGR_PORT_NUMBER: 5432
 
-### DB Health Check
-x-db-health-check: &db_health_check
-  healthcheck:
-    test: >
-      CMD-SHELL pg_isready 
-      -U $${POSTGRESQL_USERNAME}
-      -d $${POSTGRESQL_DATABASE}
+### Health Checks ###
+x-health-checks:
+  zookeeper: &zookeeper_health_check
+    test: echo srvr | nc localhost 2181 || exit 1
+    interval: 10s
+    timeout: 5s
+    retries: 5
+
+  kafka: &kafka_health_check
+    test: nc -z localhost 9092 || exit 1
+    interval: 30s
+    timeout: 10s
+    retries: 5
+
+  redis: &redis_health_check
+    test: redis-cli ping
     interval: 5s
     retries: 10
 
-### Redis Health Check
-x-redis-health-check: &redis_health_check
-  healthcheck:
-    test: >
-      CMD
-      redis-cli
-      ping
+  postgres: &postgres_health_check
+    test: pg_isready -U ${POSTGRESQL_USERNAME} -d ${POSTGRESQL_DATABASE}
     interval: 5s
     retries: 10
 
 services:
+  ### KAFKA SERVICE ###
+  # Zookeeper
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - kafka_network
+    healthcheck: *zookeeper_health_check
+    restart: unless-stopped
+
+  # Kafka
+  kafka:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9092:9092"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:29092,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # 추가 설정
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_DELETE_TOPIC_ENABLE: 'true'
+    networks:
+      - kafka_network
+      - app_network
+    healthcheck: *kafka_health_check
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Kafka UI
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "8989:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      # 추가 설정
+      KAFKA_CLUSTERS_0_READONLY: "false"
+    networks:
+      - kafka_network
+    depends_on:
+      - kafka
+    restart: unless-stopped
+
+  ### Redis ###
+  # video-service
+  cache-server:
+    image: redis
+    ports:
+      - "6379:6379"
+    healthcheck: *redis_health_check
+    networks:
+      - video_network
+
   ### USER SERVICE ###
   # DBs
   postgres-user-primary-0:
@@ -47,8 +119,8 @@ services:
       REPMGR_PARTNER_NODES: postgres-user-primary-0,postgres-user-standby-1:5432
     networks:
       - user_network
-    <<: *db_health_check
-    restart: always
+    healthcheck: *postgres_health_check
+    restart: unless-stopped
 
   postgres-user-standby-1:
     image: bitnami/postgresql-repmgr:15
@@ -64,8 +136,8 @@ services:
       REPMGR_PARTNER_NODES: postgres-user-primary-0,postgres-user-standby-1:5432
     networks:
       - user_network
-    <<: *db_health_check
-    restart: always
+    healthcheck: *postgres_health_check
+    restart: unless-stopped
 
   ### VIDEO SERVICE ###
   # DBs
@@ -83,8 +155,8 @@ services:
       REPMGR_PARTNER_NODES: postgres-video-primary-0,postgres-video-standby-1:5432
     networks:
       - video_network
-    <<: *db_health_check
-    restart: always
+    healthcheck: *postgres_health_check
+    restart: unless-stopped
 
   postgres-video-standby-1:
     image: bitnami/postgresql-repmgr:15
@@ -100,17 +172,8 @@ services:
       REPMGR_PARTNER_NODES: postgres-video-primary-0,postgres-video-standby-1:5432
     networks:
       - video_network
-    <<: *db_health_check
-    restart: always
-
-  # Redis
-  cache-server:
-    image: redis
-    ports:
-      - "6379:6379"
-    <<: *redis_health_check
-    networks:
-      - video_network
+    healthcheck: *postgres_health_check
+    restart: unless-stopped
 
   ### ADJUSTMENT SERVICE ###
   # DBs
@@ -128,8 +191,8 @@ services:
       REPMGR_PARTNER_NODES: postgres-adjustment-primary-0,postgres-adjustment-standby-1:5432
     networks:
       - adjustment_network
-    <<: *db_health_check
-    restart: always
+    healthcheck: *postgres_health_check
+    restart: unless-stopped
 
   postgres-adjustment-standby-1:
     image: bitnami/postgresql-repmgr:15
@@ -145,9 +208,8 @@ services:
       REPMGR_PARTNER_NODES: postgres-adjustment-primary-0,postgres-adjustment-standby-1:5432
     networks:
       - adjustment_network
-    <<: *db_health_check
-    restart: always
-
+    healthcheck: *postgres_health_check
+    restart: unless-stopped
 
   # Meta DB
   postgres-adjustment-metadata:
@@ -163,10 +225,15 @@ services:
       POSTGRESQL_DATABASE: settlement
     networks:
       - adjustment_network
-    <<: *db_health_check
-    restart: always
+    healthcheck: *postgres_health_check
+    restart: unless-stopped
 
 volumes:
+  # Kafka
+  zookeeper_data:
+  kafka_data:
+
+  # DBs
   postgres_user_primary_data:
   postgres_user_standby_data:
   postgres_video_primary_data:
@@ -176,6 +243,7 @@ volumes:
   postgres_adjustment_metadata:
 
 networks:
+  kafka_network:
   user_network:
   video_network:
   adjustment_network:

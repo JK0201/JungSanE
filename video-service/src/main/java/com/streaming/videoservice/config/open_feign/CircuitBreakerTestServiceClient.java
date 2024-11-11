@@ -1,4 +1,4 @@
-package com.streaming.videoservice.config.open_feign.circuit;
+package com.streaming.videoservice.config.open_feign;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;

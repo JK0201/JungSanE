@@ -11,7 +11,6 @@ import com.streaming.adjustmentservice.service.RevenueCalculatorService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
-import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
@@ -21,6 +20,7 @@ import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JpaPagingItemReader;
 import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -32,7 +32,6 @@ import java.util.Collections;
 import java.util.Map;
 
 @Configuration
-@RequiredArgsConstructor
 public class DailyBatchConfig {
 
     private final JobRepository jobRepository;
@@ -40,6 +39,19 @@ public class DailyBatchConfig {
     private final RevenueCalculatorService revenueCalculatorService;
     private final EntityManagerFactory entityManagerFactory;
     private final DailyStatisticRepository dailyStatisticRepository;
+
+    public DailyBatchConfig(
+            JobRepository jobRepository,
+            @Qualifier("metaTransactionManager") PlatformTransactionManager platformTransactionManager,
+            RevenueCalculatorService revenueCalculatorService,
+            EntityManagerFactory entityManagerFactory,
+            DailyStatisticRepository dailyStatisticRepository) {
+        this.platformTransactionManager = platformTransactionManager;
+        this.jobRepository = jobRepository;
+        this.revenueCalculatorService = revenueCalculatorService;
+        this.entityManagerFactory = entityManagerFactory;
+        this.dailyStatisticRepository = dailyStatisticRepository;
+    }
 
     // -1일 00:00:00
     private final LocalDateTime START_DATE =

@@ -1,6 +1,6 @@
 package com.streaming.videoservice.controller;
 
-import com.streaming.videoservice.config.open_feign.circuit.CircuitBreakerTestServiceClient;
+import com.streaming.videoservice.config.open_feign.CircuitBreakerTestServiceClient;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import lombok.RequiredArgsConstructor;

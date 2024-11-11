@@ -31,7 +31,7 @@ public class PlaybackLog {
     private Long advertisementViewCount;
 
     @Column(nullable = false)
-    private boolean isNewView;
+    private Boolean isNewView;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
