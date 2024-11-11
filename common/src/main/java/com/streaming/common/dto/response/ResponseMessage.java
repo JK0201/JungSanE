@@ -1,4 +1,4 @@
-package com.streaming.common.dto;
+package com.streaming.common.dto.response;
 
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;

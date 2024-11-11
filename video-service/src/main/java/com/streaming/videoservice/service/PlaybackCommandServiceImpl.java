@@ -1,6 +1,6 @@
 package com.streaming.videoservice.service;
 
-import com.streaming.common.dto.PlaybackEvent;
+import com.streaming.common.dto.event.PlaybackEvent;
 import com.streaming.common.exception.ResourceNotFoundException;
 import com.streaming.videoservice.config.redis.RedisService;
 import com.streaming.videoservice.config.redis.RedissonLockFacade;
@@ -129,7 +129,7 @@ public class PlaybackCommandServiceImpl implements PlaybackCommandService {
                 log.info("광고 조회수 : {}", event.getAdvertisementViewCount());
                 log.info("영상 시청 시간 : {}", event.getVideoPlayedTime());
 
-//                sendToKafka(event);
+                sendToKafka(event);
             }
 
             // 영상을 다 봤다면 유저 시청 위치를 0L로 초기화
@@ -162,10 +162,24 @@ public class PlaybackCommandServiceImpl implements PlaybackCommandService {
         return (long) viewedAdvertisements.size();
     }
 
-//    private void sendToKafka(PlaybackEvent event) {
-//        try {
-//            kafkaTemplate.send(TOPIC, event.getVideoId().toString(), event)
-//                    .addCallback()
-//        }
-//    }
+    /**
+     * 생성된 PlaybackEvent를 adjustment-service에 Kafka로 이벤트 전송
+     *
+     * @param event (PlaybackEvent)
+     */
+    private void sendToKafka(PlaybackEvent event) {
+        try {
+            log.info("Sending event: {}", event);
+            kafkaTemplate.send(TOPIC, event.getVideoId().toString(), event)
+                    .whenComplete((result, ex) -> {
+                        if (ex == null) {
+                            log.info("Event sent successfully");
+                        } else {
+                            log.error("Failed to send event: {}", ex.getMessage());
+                        }
+                    });
+        } catch (Exception ex) {
+            log.error("Error sending event: {}", ex.getMessage());
+        }
+    }
 }
