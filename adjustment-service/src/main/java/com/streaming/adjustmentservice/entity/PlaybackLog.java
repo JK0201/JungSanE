@@ -1,5 +1,6 @@
 package com.streaming.adjustmentservice.entity;
 
+import com.streaming.common.dto.event.PlaybackEvent;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -36,6 +37,14 @@ public class PlaybackLog {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false)
-    private LocalDateTime modifiedAt;
+    public static PlaybackLog from(PlaybackEvent playbackEvent) {
+        PlaybackLog playbackLog = new PlaybackLog();
+        playbackLog.videoId = playbackEvent.getVideoId();
+        playbackLog.uploaderId = playbackEvent.getUploaderId();
+        playbackLog.videoPlayedTime = playbackEvent.getVideoPlayedTime();
+        playbackLog.advertisementViewCount = playbackEvent.getAdvertisementViewCount();
+        playbackLog.isNewView = playbackEvent.getIsNewView();
+        playbackLog.createdAt = playbackEvent.getCreatedAt();
+        return playbackLog;
+    }
 }

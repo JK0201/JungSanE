@@ -1,6 +1,7 @@
 package com.streaming.adjustmentservice.repository;
 
-import com.streaming.adjustmentservice.entity.DailyStatistic;
+import com.streaming.adjustmentservice.entity.statistic.DailyStatistic;
+import com.streaming.adjustmentservice.service.port.DailyStatisticRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.item.Chunk;
 import org.springframework.stereotype.Repository;
@@ -22,5 +23,15 @@ public class DailyStatisticRepositoryImpl implements DailyStatisticRepository {
     @Override
     public List<DailyStatistic> findDailyTop5ByVideoViewCount(LocalDate yesterday) {
         return dailyStatisticJpaRepository.findDailyTop5ByVideoViewCount(yesterday);
+    }
+
+    @Override
+    public void save(DailyStatistic dailyStatistic) {
+        dailyStatisticJpaRepository.save(dailyStatistic);
+    }
+
+    @Override
+    public void findById(long l) {
+        dailyStatisticJpaRepository.findById(l);
     }
 }

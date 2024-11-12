@@ -1,4 +1,4 @@
-package com.streaming.adjustmentservice.entity;
+package com.streaming.adjustmentservice.entity.statistic;
 
 import com.streaming.adjustmentservice.dto.PlaybackSummary;
 import jakarta.persistence.*;
@@ -21,6 +21,9 @@ public class DailyStatistic {
 
     @Column(nullable = false)
     private Long videoId;
+
+    @Column(nullable = false)
+    private Long uploaderId;
 
     @Column(nullable = false)
     private Long videoPlayedTime;

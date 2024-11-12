@@ -1,5 +1,6 @@
 package com.streaming.adjustmentservice.entity;
 
+import com.streaming.adjustmentservice.entity.statistic.DailyStatistic;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

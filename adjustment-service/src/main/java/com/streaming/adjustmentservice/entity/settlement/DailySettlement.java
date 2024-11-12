@@ -1,4 +1,4 @@
-package com.streaming.adjustmentservice.entity;
+package com.streaming.adjustmentservice.entity.settlement;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

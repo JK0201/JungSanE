@@ -1,11 +1,10 @@
-package com.streaming.userservice.service;
+package com.streaming.userservice.oauth2;
 
 import com.streaming.userservice.dto.response.GoogleResponse;
 import com.streaming.userservice.dto.response.NaverResponse;
 import com.streaming.userservice.dto.response.OAuth2Response;
 import com.streaming.userservice.entity.user.AuthProvider;
 import com.streaming.userservice.entity.user.User;
-import com.streaming.userservice.oauth2.CustomOAuth2User;
 import com.streaming.userservice.service.port.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

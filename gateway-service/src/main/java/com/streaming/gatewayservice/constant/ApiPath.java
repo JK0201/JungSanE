@@ -30,7 +30,10 @@ public class ApiPath {
             "/user-service/login/**",
 
             // Circuit Breaker Test
-            "/video-service/test/**"
+            "/video-service/test/**",
+
+            // Test API
+            "/adjustment-service/**"
     );
 
     // Protected API (권한별 경로)

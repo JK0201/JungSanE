@@ -27,7 +27,7 @@ public class JpaConfig {
      */
     @Bean
     public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-            @Qualifier("dataSource") DataSource dataSource,
+            @Qualifier("applicationDataSource") DataSource dataSource,
             @Value("${spring.jpa.entity-package}") String entityPackage
     ) {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
@@ -80,6 +80,8 @@ public class JpaConfig {
         properties.put("hibernate.show_sql", "true");
         properties.put("hibernate.format_sql", "true");
         properties.put("hibernate.jpa.open-in-view", "false");
+        properties.put("hibernate.physical_naming_strategy",
+                "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy");
 
         return properties;
     }

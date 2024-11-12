@@ -1,7 +1,7 @@
 package com.streaming.userservice.config.security;
 
 import com.streaming.userservice.oauth2.OAuth2SuccessHandler;
-import com.streaming.userservice.service.OAuth2UserService;
+import com.streaming.userservice.oauth2.OAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

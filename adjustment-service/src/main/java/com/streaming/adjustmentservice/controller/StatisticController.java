@@ -1,7 +1,7 @@
 package com.streaming.adjustmentservice.controller;
 
+import com.streaming.adjustmentservice.controller.port.StatisticQueryService;
 import com.streaming.adjustmentservice.dto.StatisticResponse;
-import com.streaming.adjustmentservice.service.StatisticQueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ public class StatisticController {
     @GetMapping("/daily/views")
     public ResponseEntity<List<StatisticResponse>> dailyTopViewed() {
         System.out.println("request");
-        
+
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(statisticQueryService.dailyTopViewed());

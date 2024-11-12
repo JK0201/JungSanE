@@ -1,6 +1,6 @@
 package com.streaming.adjustmentservice.repository;
 
-import com.streaming.adjustmentservice.entity.DailyStatistic;
+import com.streaming.adjustmentservice.entity.statistic.DailyStatistic;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
