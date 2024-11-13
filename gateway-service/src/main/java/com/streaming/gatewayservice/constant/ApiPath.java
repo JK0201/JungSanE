@@ -30,7 +30,7 @@ public class ApiPath {
             "/user-service/login/**",
 
             // Circuit Breaker Test
-            "/video-service/test/**",
+            "/video-service/circuit-breaker/**",
 
             // Test API
             "/adjustment-service/**"

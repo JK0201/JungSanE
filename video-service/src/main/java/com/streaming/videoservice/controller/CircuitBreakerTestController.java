@@ -8,28 +8,30 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/circuit-breaker")
 public class CircuitBreakerTestController {
 
     @Qualifier("circuitBreakerTestServiceFallback")
     private final CircuitBreakerTestServiceClient circuitBreakerTestServiceClient;
     private final CircuitBreakerRegistry circuitBreakerRegistry;
 
-    @GetMapping("/test/case1")
+    @GetMapping("/case1")
     public ResponseEntity<String> testCase1() {
         return circuitBreakerTestServiceClient.callCase1();
     }
 
-    @GetMapping("/test/case2")
+    @GetMapping("/case2")
     public ResponseEntity<String> testCase2() {
         return circuitBreakerTestServiceClient.callCase2();
     }
 
-    @GetMapping("/test/case3")
+    @GetMapping("/case3")
     public ResponseEntity<String> testCase3() {
         return circuitBreakerTestServiceClient.callCase3();
     }

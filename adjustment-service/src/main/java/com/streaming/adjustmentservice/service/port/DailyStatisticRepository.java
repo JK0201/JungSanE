@@ -15,4 +15,5 @@ public interface DailyStatisticRepository {
     void save(DailyStatistic dailyStatistic);
 
     void findById(long l);
+
 }

@@ -1,6 +1,6 @@
 package com.streaming.adjustmentservice.service;
 
-import com.streaming.adjustmentservice.entity.PlaybackLog;
+import com.streaming.adjustmentservice.entity.statistic.PlaybackLog;
 import com.streaming.adjustmentservice.service.port.PlaybackLogRepository;
 import com.streaming.common.dto.event.PlaybackEvent;
 import lombok.RequiredArgsConstructor;

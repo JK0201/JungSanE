@@ -1,4 +1,4 @@
-package com.streaming.adjustmentservice.entity;
+package com.streaming.adjustmentservice.entity.statistic;
 
 import com.streaming.common.dto.event.PlaybackEvent;
 import jakarta.persistence.*;
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name = "playbacks")
+@Table(name = "playback_log")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PlaybackLog {
 

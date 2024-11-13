@@ -1,6 +1,6 @@
 package com.streaming.adjustmentservice.repository;
 
-import com.streaming.adjustmentservice.entity.PlaybackLog;
+import com.streaming.adjustmentservice.entity.statistic.PlaybackLog;
 import com.streaming.adjustmentservice.service.port.PlaybackLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -35,15 +36,16 @@ public class DailyStatistic {
     private Long advertisementViewCount;
 
     @Column(nullable = false)
-    private LocalDate statisticDate;
+    private LocalDateTime statisticDate;
 
-    public static DailyStatistic fromSummary(PlaybackSummary playbackSummary) {
+    public static DailyStatistic fromSummary(PlaybackSummary playbackSummary, LocalDateTime statisticDate) {
         DailyStatistic dailyStatistic = new DailyStatistic();
         dailyStatistic.videoPlayedTime = playbackSummary.getVideoPlayedTime();
         dailyStatistic.videoViewCount = playbackSummary.getVideoViewCount();
         dailyStatistic.advertisementViewCount = playbackSummary.getAdvertisementViewCount();
-        dailyStatistic.statisticDate = LocalDate.now().minusDays(1);
+        dailyStatistic.statisticDate = statisticDate;
         dailyStatistic.videoId = playbackSummary.getVideoId();
+        dailyStatistic.uploaderId = playbackSummary.getUploaderId();
         return dailyStatistic;
     }
 }
