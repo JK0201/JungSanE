@@ -16,4 +16,5 @@ public interface DailyStatisticRepository {
 
     void findById(long l);
 
+    void upsertStatistic(Long videoId, Long uploaderId, Long videoPlayedTime, Long videoViewCount, Long advertisementViewCount, LocalDate statisticDate);
 }

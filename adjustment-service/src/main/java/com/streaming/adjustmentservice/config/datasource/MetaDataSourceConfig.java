@@ -14,6 +14,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.sql.DataSource;
 
 import static com.streaming.common.constant.DatasourceConstant.METADATA_DATASOURCE;
+import static com.streaming.common.constant.DatasourceConstant.META_TRANSACTION_MANAGER;
 
 @Configuration
 public class MetaDataSourceConfig {
@@ -37,7 +38,7 @@ public class MetaDataSourceConfig {
      * 배치 메타 데이터용 TransactionManager
      */
     @Primary
-    @Bean("metaTransactionManager")
+    @Bean(META_TRANSACTION_MANAGER)
     public PlatformTransactionManager metaTransactionManager(
             @Qualifier(METADATA_DATASOURCE) DataSource metaDataSource
     ) {

@@ -36,14 +36,25 @@ public class DailyStatistic {
     private Long advertisementViewCount;
 
     @Column(nullable = false)
-    private LocalDateTime statisticDate;
+    private LocalDate statisticDate;
+
+//    public static DailyStatistic fromPlaybackLog(PlaybackLog playbackLog) {
+//        DailyStatistic dailyStatistic = new DailyStatistic();
+//        dailyStatistic.videoPlayedTime = playbackLog.getVideoPlayedTime();
+//        dailyStatistic.videoViewCount = playbackLog.getIsNewView() ? 1L : 0L;
+//        dailyStatistic.advertisementViewCount = playbackLog.getAdvertisementViewCount();
+//        dailyStatistic.statisticDate = playbackLog.getCreatedAt().toLocalDate();
+//        dailyStatistic.videoId = playbackLog.getVideoId();
+//        dailyStatistic.uploaderId = playbackLog.getUploaderId();
+//        return dailyStatistic;
+//    }
 
     public static DailyStatistic fromSummary(PlaybackSummary playbackSummary, LocalDateTime statisticDate) {
         DailyStatistic dailyStatistic = new DailyStatistic();
         dailyStatistic.videoPlayedTime = playbackSummary.getVideoPlayedTime();
         dailyStatistic.videoViewCount = playbackSummary.getVideoViewCount();
         dailyStatistic.advertisementViewCount = playbackSummary.getAdvertisementViewCount();
-        dailyStatistic.statisticDate = statisticDate;
+        dailyStatistic.statisticDate = statisticDate.toLocalDate();
         dailyStatistic.videoId = playbackSummary.getVideoId();
         dailyStatistic.uploaderId = playbackSummary.getUploaderId();
         return dailyStatistic;

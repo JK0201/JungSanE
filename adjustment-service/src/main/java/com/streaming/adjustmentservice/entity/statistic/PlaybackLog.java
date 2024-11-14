@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name = "playback_log")
+@Table(name = "playback_log", indexes = @Index(name = "idx_video_created", columnList = "video_id, created_at"))
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PlaybackLog {
 

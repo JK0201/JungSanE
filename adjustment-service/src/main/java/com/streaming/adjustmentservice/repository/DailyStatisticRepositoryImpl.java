@@ -34,4 +34,22 @@ public class DailyStatisticRepositoryImpl implements DailyStatisticRepository {
     public void findById(long l) {
         dailyStatisticJpaRepository.findById(l);
     }
+
+    @Override
+    public void upsertStatistic(
+            Long videoId,
+            Long uploaderId,
+            Long videoPlayedTime,
+            Long videoViewCount,
+            Long advertisementViewCount,
+            LocalDate statisticDate
+    ) {
+        dailyStatisticJpaRepository.upsertStatistic(
+                videoId,
+                uploaderId,
+                videoPlayedTime,
+                videoViewCount,
+                advertisementViewCount,
+                statisticDate);
+    }
 }
