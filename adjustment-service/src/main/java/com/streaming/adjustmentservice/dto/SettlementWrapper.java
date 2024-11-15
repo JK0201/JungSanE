@@ -1,7 +1,7 @@
 package com.streaming.adjustmentservice.dto;
 
 import com.streaming.adjustmentservice.entity.settlement.DailySettlement;
-import com.streaming.adjustmentservice.entity.statistic.VideoSnapshot;
+import com.streaming.adjustmentservice.entity.settlement.VideoSnapshot;
 import lombok.Builder;
 import lombok.Getter;
 

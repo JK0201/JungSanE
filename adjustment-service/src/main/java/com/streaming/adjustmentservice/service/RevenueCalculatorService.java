@@ -17,7 +17,7 @@ public class RevenueCalculatorService {
      * @param currentVideoViews (long)
      * @return BigDecimal
      */
-    public BigDecimal views(long totalVideoViews, long currentVideoViews) {
+    public BigDecimal calculateVideoRevenue(long totalVideoViews, long currentVideoViews) {
         BigDecimal revenue = BigDecimal.ZERO;
         long previousVideoViews = totalVideoViews - currentVideoViews;
         log.info("이전 영상 누적 조회수 : {}", previousVideoViews);
@@ -68,7 +68,7 @@ public class RevenueCalculatorService {
      * @param currentAdvertisementViews (long)
      * @return BigDecimal
      */
-    public BigDecimal advertisements(long totalAdvertisementViews, long currentAdvertisementViews) {
+    public BigDecimal calculateAdvertisementRevenue(long totalAdvertisementViews, long currentAdvertisementViews) {
         BigDecimal revenue = BigDecimal.ZERO;
         long previousAdvertisementViews = totalAdvertisementViews - currentAdvertisementViews;
         log.info("이전 누적 광고 조회수 : {}", previousAdvertisementViews);

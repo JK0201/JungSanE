@@ -9,14 +9,14 @@ import java.time.LocalDate;
 
 @Entity
 @Getter
-@Table(
-        name = "daily_statistic",
+@Table(name = "daily_statistic",
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_daily_statistic_video_date",
                         columnNames = {"video_id", "statistic_date"}
                 )
-        })
+        }
+)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DailyStatistic {
 
@@ -51,6 +51,17 @@ public class DailyStatistic {
         dailyStatistic.videoViewCount = videoViewCount;
         dailyStatistic.advertisementViewCount = advertisementViewCount;
         dailyStatistic.statisticDate = statisticDate;
+        return dailyStatistic;
+    }
+
+    public static DailyStatistic test(long videoId, long uploaderId, long videoPlayedTime, long videoViewCount, long advertisementViewCount, LocalDate yesterday) {
+        DailyStatistic dailyStatistic = new DailyStatistic();
+        dailyStatistic.videoId = videoId;
+        dailyStatistic.uploaderId = uploaderId;
+        dailyStatistic.videoPlayedTime = videoPlayedTime;
+        dailyStatistic.videoViewCount = videoViewCount;
+        dailyStatistic.advertisementViewCount = advertisementViewCount;
+        dailyStatistic.statisticDate = yesterday;
         return dailyStatistic;
     }
 

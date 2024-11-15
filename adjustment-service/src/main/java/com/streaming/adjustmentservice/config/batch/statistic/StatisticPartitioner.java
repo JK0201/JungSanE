@@ -1,4 +1,4 @@
-package com.streaming.adjustmentservice.config.batch;
+package com.streaming.adjustmentservice.config.batch.statistic;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,7 +6,6 @@ import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,16 +20,6 @@ public class StatisticPartitioner implements Partitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
-        try {
-            log.info("JDBC URL: {}", jdbcTemplate.getDataSource().getConnection().getMetaData().getURL());
-            log.info("JDBC Username: {}", jdbcTemplate.getDataSource().getConnection().getMetaData().getUserName());
-            log.info("Current Schema: {}", jdbcTemplate.getDataSource().getConnection().getSchema());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        log.info("Start Time: {}", START_TIME);
-        log.info("End Time: {}", END_TIME);
         IdRange idRange = jdbcTemplate.queryForObject("""
                         SELECT min(video_id) as min_id, max(video_id) as max_id 
                         FROM playback_log 

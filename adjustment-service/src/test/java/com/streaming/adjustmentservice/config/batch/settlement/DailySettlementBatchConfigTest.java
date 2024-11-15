@@ -1,4 +1,4 @@
-package com.streaming.adjustmentservice.config.batch;
+package com.streaming.adjustmentservice.config.batch.settlement;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -16,24 +16,24 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-@Slf4j(topic = "Batch Test")
+@Slf4j(topic = "Settlement Batch Test")
 @SpringBootTest
-class DailyStatisticBatchConfigTest {
+class DailySettlementBatchConfigTest {
 
     @Autowired
     private JobLauncher jobLauncher;
 
     @Autowired
-    private Job dailyStatisticJob;
+    private Job dailySettlementJob;
 
     @Autowired
     private TaskExecutor statisticTaskExecutor;
 
     @Test
-    @DisplayName("DailyStatistic 배치 작업 성능 테스트")
+    @DisplayName("DailySettlement 배치 작업 성능 테스트")
     void testBatchJobPerformance() throws Exception {
         // Given
-        long initialPlaybackCount = 20_000_000;
+        long initialPlaybackCount = 100_000_000;
         JobParameters jobParameters = new JobParametersBuilder()
                 .addString("datetime", LocalDateTime.now().toString())
                 .toJobParameters();
@@ -42,7 +42,7 @@ class DailyStatisticBatchConfigTest {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("Statistic Batch Job Execution");
 
-        JobExecution jobExecution = jobLauncher.run(dailyStatisticJob, jobParameters);
+        JobExecution jobExecution = jobLauncher.run(dailySettlementJob, jobParameters);
 
         stopWatch.stop();
 

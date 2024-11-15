@@ -1,5 +1,6 @@
-package com.streaming.adjustmentservice.entity.statistic;
+package com.streaming.adjustmentservice.entity.settlement;
 
+import com.streaming.adjustmentservice.entity.statistic.DailyStatistic;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -37,5 +38,20 @@ public class VideoSnapshot {
         videoSnapshot.snapshotDate = dailyStatistic.getStatisticDate();
         videoSnapshot.videoId = dailyStatistic.getVideoId();
         return videoSnapshot;
+    }
+
+//    public static VideoSnapshot test(long videoId, long videoViewCount, long advertisementViewCount, LocalDate yesterday) {
+//        VideoSnapshot videoSnapshot = new VideoSnapshot();
+//        videoSnapshot.videoId = videoId;
+//        videoSnapshot.videoViewCount = videoViewCount;
+//        videoSnapshot.advertisementViewCount = advertisementViewCount;
+//        videoSnapshot.snapshotDate = yesterday;
+//        return videoSnapshot;
+//    }
+    
+    public void updateSnapshot(DailyStatistic dailyStatistic) {
+        this.videoViewCount += dailyStatistic.getVideoViewCount();
+        this.advertisementViewCount += dailyStatistic.getAdvertisementViewCount();
+        this.snapshotDate = dailyStatistic.getStatisticDate();
     }
 }

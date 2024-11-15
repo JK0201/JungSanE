@@ -1,4 +1,4 @@
-package com.streaming.adjustmentservice.config.batch;
+package com.streaming.adjustmentservice.config.batch.statistic;
 
 import com.streaming.adjustmentservice.entity.statistic.DailyStatistic;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +47,7 @@ public class DailyStatisticBatchConfig {
     private final LocalDateTime batchStartTime = LocalDateTime.now();
     // 배치 시작 시간 -> (시작 시 - 2시간) : 00분 : 00초
     private final LocalDateTime START_TIME = batchStartTime
-            .minusHours(3)
+            .minusHours(2)
             .withMinute(0)
             .withSecond(0);
     // 배치 종료 시간 -> (시작 시) : 00분 : 00초
@@ -189,54 +189,4 @@ public class DailyStatisticBatchConfig {
 
         return executor;
     }
-
-//    @Bean
-//    public Step videoSnapshotStep(
-//            PlatformTransactionManager transactionManager,
-//            DataSource readDataSource
-//    ) {
-//        return new StepBuilder("videoSnapshotStep", jobRepository)
-//                .partitioner("videoSnapshotPartition", videoBasedPartitioner(readDataSource))
-//                .step(videoSnapshotSlaveStep(transactionManager))
-//                .gridSize(threadCount)
-//                .taskExecutor(statisticTaskExecutor())
-//                .build();
-//    }
-//
-//    @Bean
-//    public Step videoSnapshotSlaveStep(PlatformTransactionManager transactionManager) {
-//        return new StepBuilder("videoSnapshotSlaveStep", jobRepository)
-//                .<DailyStatistic, VideoSnapshot>chunk(chunkSize, transactionManager)
-//                .reader(videoSnapshotReader(null, null))
-//                .processor(videoSnapshotProcessor())
-//                .writer(videoSnapshotWriter())
-//                .build();
-//    }
-//
-//    @Bean
-//    public JpaPagingItemReader<DailyStatistic> videoSnapshotReader(
-//            @Value("#{stepExecutionContext[minVideoId]}") Long minVideoId,
-//            @Value("#{stepExecutionContext[maxVideoId]}") Long maxVideoId
-//    ) {
-//        return new JpaPagingItemReaderBuilder<DailyStatistic>()
-//                .name("videoSnapshotReader")
-//                .entityManagerFactory(entityManagerFactory)
-//                .pageSize(chunkSize)
-//                .queryString("""
-//                        select ds from DailyStatistic ds
-//                        where ds.statisticDate = :TARGET_DATE
-//                        """)
-//                .parameterValues(Collections.singletonMap("TARGET_DATE", LocalDate.now()))
-//                .build();
-//    }
-//
-//    @Bean
-//    ItemProcessor<DailyStatistic, VideoSnapshot> videoSnapshotProcessor() {
-//        return VideoSnapshot::fromStatistic;
-//    }
-//
-//    @Bean
-//    public ItemWriter<VideoSnapshot> videoSnapshotWriter() {
-//        return videoSnapshotJpaRepository::saveAll;
-//    }
 }

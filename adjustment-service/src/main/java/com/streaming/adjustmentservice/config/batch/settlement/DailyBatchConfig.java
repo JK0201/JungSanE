@@ -1,6 +1,5 @@
 //package com.streaming.adjustmentservice.config.batch;
 //
-//import com.streaming.adjustmentservice.dto.PlaybackSummary;
 //import com.streaming.adjustmentservice.dto.SettlementWrapper;
 //import com.streaming.adjustmentservice.dto.StatisticWrapper;
 //import com.streaming.adjustmentservice.entity.VideoSnapshot;
@@ -11,6 +10,7 @@
 //import jakarta.persistence.EntityManager;
 //import jakarta.persistence.EntityManagerFactory;
 //import jakarta.persistence.EntityTransaction;
+//import lombok.RequiredArgsConstructor;
 //import org.springframework.batch.core.Job;
 //import org.springframework.batch.core.Step;
 //import org.springframework.batch.core.job.builder.JobBuilder;
@@ -20,7 +20,6 @@
 //import org.springframework.batch.item.ItemWriter;
 //import org.springframework.batch.item.database.JpaPagingItemReader;
 //import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
-//import org.springframework.beans.factory.annotation.Qualifier;
 //import org.springframework.context.annotation.Bean;
 //import org.springframework.context.annotation.Configuration;
 //import org.springframework.transaction.PlatformTransactionManager;
@@ -29,9 +28,9 @@
 //import java.time.LocalDate;
 //import java.time.LocalDateTime;
 //import java.util.Collections;
-//import java.util.Map;
 //
 //@Configuration
+//@RequiredArgsConstructor
 //public class DailyBatchConfig {
 //
 //    private final JobRepository jobRepository;
@@ -39,19 +38,6 @@
 //    private final RevenueCalculatorService revenueCalculatorService;
 //    private final EntityManagerFactory entityManagerFactory;
 //    private final DailyStatisticRepository dailyStatisticRepository;
-//
-//    public DailyBatchConfig(
-//            JobRepository jobRepository,
-//            @Qualifier("metaTransactionManager") PlatformTransactionManager platformTransactionManager,
-//            RevenueCalculatorService revenueCalculatorService,
-//            EntityManagerFactory entityManagerFactory,
-//            DailyStatisticRepository dailyStatisticRepository) {
-//        this.platformTransactionManager = platformTransactionManager;
-//        this.jobRepository = jobRepository;
-//        this.revenueCalculatorService = revenueCalculatorService;
-//        this.entityManagerFactory = entityManagerFactory;
-//        this.dailyStatisticRepository = dailyStatisticRepository;
-//    }
 //
 //    // -1일 00:00:00
 //    private final LocalDateTime START_DATE =
@@ -74,11 +60,10 @@
 //    @Bean
 //    public Job dailyStatisticJob() {
 //        return new JobBuilder("dailyStatisticJob", jobRepository)
-//                .start(dailyStatisticStep())
-//                .next(dailySettlementStep())
+//                .start(dailySettlementStep())
 //                .build();
 //    }
-
+//
 //    // 정산 스텝
 //    @Bean
 //    public Step dailySettlementStep() {
@@ -98,9 +83,9 @@
 //                .entityManagerFactory(entityManagerFactory)
 //                .pageSize(10)
 //                .queryString("""
-//                        select new com.streaming.settlement.adjustment.dto.StatisticWrapper(ds, vs, ds.videoId)
+//                        select new com.streaming.settlement.adjustmentservice.dto.StatisticWrapper(ds, vs, ds.videoId)
 //                        from DailyStatistic ds
-//                        join VideoSnapshot vs on vs.video.id = ds.video.id
+//                        left join VideoSnapshot vs on vs.video.id = ds.video.id
 //                        where ds.statisticDate = :TARGET_DATE
 //                        """)
 //                .parameterValues(Collections.singletonMap("TARGET_DATE", TARGET_DATE))

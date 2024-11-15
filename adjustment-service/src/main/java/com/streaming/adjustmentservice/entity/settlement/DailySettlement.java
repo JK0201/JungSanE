@@ -23,6 +23,9 @@ public class DailySettlement {
     private Long videoId;
 
     @Column(nullable = false)
+    private Long uploaderId;
+
+    @Column(nullable = false)
     private BigDecimal videoRevenue;
 
     @Column(nullable = false)
@@ -34,13 +37,14 @@ public class DailySettlement {
     @Column(nullable = false)
     private LocalDate settlementDate;
 
-    public static DailySettlement from(BigDecimal videoRevenue, BigDecimal advertisementRevenue, Long videoId) {
+    public static DailySettlement fromRevenue(BigDecimal videoRevenue, BigDecimal advertisementRevenue, LocalDate settlementDate, Long videoId, Long uploaderId) {
         DailySettlement dailySettlement = new DailySettlement();
         dailySettlement.videoRevenue = videoRevenue;
         dailySettlement.advertisementRevenue = advertisementRevenue;
         dailySettlement.totalRevenue = videoRevenue.add(advertisementRevenue);
-        dailySettlement.settlementDate = LocalDate.now().minusDays(1);
+        dailySettlement.settlementDate = settlementDate;
         dailySettlement.videoId = videoId;
+        dailySettlement.uploaderId = uploaderId;
         return dailySettlement;
     }
 }

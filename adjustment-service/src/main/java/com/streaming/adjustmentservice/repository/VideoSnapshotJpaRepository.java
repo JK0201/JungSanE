@@ -1,6 +1,6 @@
 package com.streaming.adjustmentservice.repository;
 
-import com.streaming.adjustmentservice.entity.statistic.VideoSnapshot;
+import com.streaming.adjustmentservice.entity.settlement.VideoSnapshot;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
