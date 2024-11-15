@@ -50,7 +50,7 @@ public class DailyStatisticBatchConfig {
     private final LocalDateTime batchStartTime = LocalDateTime.now();
     // 배치 시작 시간 -> (시작 시 - 2시간) : 00분 : 00초
     private final LocalDateTime START_TIME = batchStartTime
-            .minusHours(2)
+            .minusHours(3)
             .withMinute(0)
             .withSecond(0);
     // 배치 종료 시간 -> (시작 시) : 00분 : 00초
@@ -76,7 +76,7 @@ public class DailyStatisticBatchConfig {
         return new StepBuilder("dailyStatisticStep", jobRepository)
                 .partitioner("statisticPartition", statisticPartitioner(readDataSource))
                 .step(statisticSlaveStep(transactionManager))
-                .gridSize(threadCount)
+                .gridSize(threadCount * 4)
                 .taskExecutor(statisticTaskExecutor())
                 .build();
     }

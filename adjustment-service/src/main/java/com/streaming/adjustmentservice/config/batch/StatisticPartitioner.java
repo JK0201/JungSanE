@@ -20,6 +20,8 @@ public class StatisticPartitioner implements Partitioner {
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
+        log.info(START_TIME.toString());
+        log.info(END_TIME.toString());
         IdRange idRange = jdbcTemplate.queryForObject("""
                         SELECT min(video_id) as min_id, max(video_id) as max_id 
                         FROM playback_log 
