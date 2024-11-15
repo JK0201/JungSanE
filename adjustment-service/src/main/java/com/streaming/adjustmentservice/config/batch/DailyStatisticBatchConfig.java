@@ -1,9 +1,6 @@
 package com.streaming.adjustmentservice.config.batch;
 
-import com.streaming.adjustmentservice.dto.PlaybackSummary;
 import com.streaming.adjustmentservice.entity.statistic.DailyStatistic;
-import com.streaming.adjustmentservice.service.port.DailyStatisticRepository;
-import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -12,10 +9,10 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JpaPagingItemReader;
-import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
+import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -26,11 +23,13 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.streaming.common.constant.DatasourceConstant.READ_DATASOURCE;
+import static com.streaming.common.constant.DatasourceConstant.WRITE_DATASOURCE;
 
 @Slf4j
 @Configuration
@@ -38,8 +37,6 @@ import static com.streaming.common.constant.DatasourceConstant.READ_DATASOURCE;
 public class DailyStatisticBatchConfig {
 
     private final JobRepository jobRepository;
-    private final EntityManagerFactory entityManagerFactory;
-    private final DailyStatisticRepository dailyStatisticRepository;
 
     @Value("${spring.batch.statistics.thread-count}")
     private int threadCount;
@@ -61,82 +58,117 @@ public class DailyStatisticBatchConfig {
     @Bean
     public Job dailyStatisticJob(
             @Qualifier("metaTransactionManager") PlatformTransactionManager transactionManager,
-            @Qualifier(READ_DATASOURCE) DataSource readDataSource
+            @Qualifier(READ_DATASOURCE) DataSource readDataSource,
+            @Qualifier(WRITE_DATASOURCE) DataSource writeDataSource
     ) {
         return new JobBuilder("dailyStatisticJob", jobRepository)
-                .start(dailyStatisticStep(transactionManager, readDataSource))
+                .start(dailyStatisticStep(transactionManager, readDataSource, writeDataSource))
                 .build();
     }
 
     @Bean
     public Step dailyStatisticStep(
             PlatformTransactionManager transactionManager,
-            DataSource readDataSource
+            DataSource readDataSource,
+            DataSource writeDataSource
     ) {
         return new StepBuilder("dailyStatisticStep", jobRepository)
                 .partitioner("statisticPartition", statisticPartitioner(readDataSource))
-                .step(statisticSlaveStep(transactionManager))
-                .gridSize(threadCount * 4)
+                .step(statisticSlaveStep(transactionManager, readDataSource, writeDataSource))
+                .gridSize(threadCount * 2)
                 .taskExecutor(statisticTaskExecutor())
                 .build();
     }
 
     @Bean
-    public Step statisticSlaveStep(PlatformTransactionManager transactionManager) {
+    public Step statisticSlaveStep(
+            PlatformTransactionManager transactionManager,
+            DataSource readDataSource,
+            DataSource writeDataSource
+    ) {
         return new StepBuilder("statisticSlaveStep", jobRepository)
-                .<PlaybackSummary, DailyStatistic>chunk(chunkSize, transactionManager)
-                .reader(dailyStatisticReader(null, null))
-                .processor(dailyStatisticProcessor())
-                .writer(dailyStatisticWriter())
+                .<DailyStatistic, DailyStatistic>chunk(chunkSize, transactionManager)
+                .reader(dailyStatisticReader(readDataSource, null, null))
+                .writer(dailyStatisticWriter(writeDataSource))
                 .build();
     }
 
-    // PlaybackSummary로 GROUP BY로 연산한 Playback 가져오기
+    //
     @Bean
     @StepScope
-    public JpaPagingItemReader<PlaybackSummary> dailyStatisticReader(
+    public JdbcCursorItemReader<DailyStatistic> dailyStatisticReader(
+            @Qualifier(READ_DATASOURCE) DataSource readDataSource,
             @Value("#{stepExecutionContext[minVideoId]}") Long minVideoId,
             @Value("#{stepExecutionContext[maxVideoId]}") Long maxVideoId
     ) {
-        return new JpaPagingItemReaderBuilder<PlaybackSummary>()
+        return new JdbcCursorItemReaderBuilder<DailyStatistic>()
                 .name("dailyStatisticReader")
-                .entityManagerFactory(entityManagerFactory)
-                .pageSize(chunkSize)
-                .queryString("""
-                        select new com.streaming.adjustmentservice.dto.PlaybackSummary(
-                            sum(p.videoPlayedTime), 
-                            sum(case when p.isNewView = true then 1 else 0 end), 
-                            sum(p.advertisementViewCount), 
-                            p.videoId, 
-                            p.uploaderId
-                        ) 
-                        from PlaybackLog p 
-                        where p.createdAt >= :START_TIME 
-                        and p.createdAt < :END_TIME 
-                        and p.videoId >= :minVideoId
-                        and p.videoId < :maxVideoId
-                        group by p.videoId, p.uploaderId
-                        order by p.videoId
+                .dataSource(readDataSource)
+                .sql("""
+                        SELECT 
+                            SUM(video_played_time) as video_played_time, 
+                            SUM(CASE WHEN is_new_view = true THEN 1 ELSE 0 END) as video_view_count, 
+                            SUM(advertisement_view_count) as advertisement_view_count, 
+                            video_id, 
+                            uploader_id 
+                        FROM playback_log 
+                        WHERE created_at >= ? 
+                        AND created_at < ? 
+                        AND video_id >= ? 
+                        AND video_id < ? 
+                        GROUP BY video_id, uploader_id 
+                        ORDER BY video_id
                         """)
-                .parameterValues(Map.of(
-                        "START_TIME", START_TIME,
-                        "END_TIME", END_TIME,
-                        "minVideoId", minVideoId,
-                        "maxVideoId", maxVideoId
+                .rowMapper((rs, rowNum) -> DailyStatistic.of(
+                        rs.getLong("video_id"),
+                        rs.getLong("uploader_id"),
+                        rs.getLong("video_played_time"),
+                        rs.getLong("video_view_count"),
+                        rs.getLong("advertisement_view_count"),
+                        START_TIME.toLocalDate()
                 ))
+                .preparedStatementSetter(ps -> {
+                    ps.setTimestamp(1, Timestamp.valueOf(START_TIME));
+                    ps.setTimestamp(2, Timestamp.valueOf(END_TIME));
+                    ps.setLong(3, minVideoId);
+                    ps.setLong(4, maxVideoId);
+                })
                 .build();
-    }
-
-    // DailyStatistic 객체로 맵핑
-    @Bean
-    public ItemProcessor<PlaybackSummary, DailyStatistic> dailyStatisticProcessor() {
-        return summary -> DailyStatistic.fromSummary(summary, START_TIME);
     }
 
     // DailyStatistic 저장
     @Bean
-    public ItemWriter<DailyStatistic> dailyStatisticWriter() {
-        return dailyStatisticRepository::saveAll;
+    public ItemWriter<DailyStatistic> dailyStatisticWriter(
+            @Qualifier(WRITE_DATASOURCE) DataSource writeDataSource
+    ) {
+        JdbcBatchItemWriter<DailyStatistic> writer = new JdbcBatchItemWriter<>();
+        writer.setDataSource(writeDataSource);
+        writer.setSql("""
+                INSERT INTO daily_statistic (
+                    video_id, uploader_id, video_played_time, 
+                    video_view_count, advertisement_view_count, 
+                    statistic_date
+                ) VALUES (
+                    ?, ?, ?, ?, ?, ?
+                )
+                ON CONFLICT (video_id, statistic_date)  
+                DO UPDATE SET 
+                    video_played_time = daily_statistic.video_played_time + EXCLUDED.video_played_time,
+                    video_view_count = daily_statistic.video_view_count + EXCLUDED.video_view_count,
+                    advertisement_view_count = daily_statistic.advertisement_view_count + EXCLUDED.advertisement_view_count,
+                    uploader_id = EXCLUDED.uploader_id
+                """);
+
+        writer.setItemPreparedStatementSetter((item, ps) -> {
+            ps.setLong(1, item.getVideoId());
+            ps.setLong(2, item.getUploaderId());
+            ps.setLong(3, item.getVideoPlayedTime());
+            ps.setLong(4, item.getVideoViewCount());
+            ps.setLong(5, item.getAdvertisementViewCount());
+            ps.setDate(6, Date.valueOf(item.getStatisticDate()));
+        });
+
+        return writer;
     }
 
     @Bean

@@ -78,56 +78,7 @@
 //                .next(dailySettlementStep())
 //                .build();
 //    }
-//
-//    // 통계 스텝
-//    @Bean
-//    public Step dailyStatisticStep() {
-//        return new StepBuilder("dailyStatisticStep", jobRepository)
-//                .<PlaybackSummary, DailyStatistic>chunk(10, platformTransactionManager)
-//                .reader(dailyStatisticReader())
-//                .processor(dailyStatisticProcessor())
-//                .writer(dailyStatisticWriter())
-//                .build();
-//    }
-//
-//    // PlaybackSummary로 쿼리로 연산한 Playback 가져오기
-//    @Bean
-//    public JpaPagingItemReader<PlaybackSummary> dailyStatisticReader() {
-//        return new JpaPagingItemReaderBuilder<PlaybackSummary>()
-//                .name("dailyStatisticReader")
-//                .entityManagerFactory(entityManagerFactory)
-//                .pageSize(10)
-//                .queryString("""
-//                        select new com.streaming.settlement.adjustment.dto.PlaybackSummary(
-//                            sum(p.videoPlayedTime),
-//                            count(p.id),
-//                            sum(p.advertisementViewCount),
-//                            p.videoId
-//                        )
-//                        from Playback p
-//                        where p.createdAt >= :START_DATE
-//                        and p.createdAt < :END_DATE
-//                        group by p.video.id
-//                        """)
-//                .parameterValues(Map.of(
-//                        "START_DATE", START_DATE,
-//                        "END_DATE", END_DATE
-//                ))
-//                .build();
-//    }
-//
-//    // DailyStatistic 객체로 맵핑
-//    @Bean
-//    public ItemProcessor<PlaybackSummary, DailyStatistic> dailyStatisticProcessor() {
-//        return DailyStatistic::fromSummary;
-//    }
-//
-//    // DailyStatistic 저장
-//    @Bean
-//    public ItemWriter<DailyStatistic> dailyStatisticWriter() {
-//        return dailyStatisticRepository::saveAll;
-//    }
-//
+
 //    // 정산 스텝
 //    @Bean
 //    public Step dailySettlementStep() {

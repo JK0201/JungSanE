@@ -1,17 +1,22 @@
 package com.streaming.adjustmentservice.entity.statistic;
 
-import com.streaming.adjustmentservice.dto.PlaybackSummary;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Table(name = "dailyStatistics")
+@Table(
+        name = "daily_statistic",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_daily_statistic_video_date",
+                        columnNames = {"video_id", "statistic_date"}
+                )
+        })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DailyStatistic {
 
@@ -38,7 +43,18 @@ public class DailyStatistic {
     @Column(nullable = false)
     private LocalDate statisticDate;
 
-//    public static DailyStatistic fromPlaybackLog(PlaybackLog playbackLog) {
+    public static DailyStatistic of(long videoId, long uploaderId, long videoPlayedTime, long videoViewCount, long advertisementViewCount, LocalDate statisticDate) {
+        DailyStatistic dailyStatistic = new DailyStatistic();
+        dailyStatistic.videoId = videoId;
+        dailyStatistic.uploaderId = uploaderId;
+        dailyStatistic.videoPlayedTime = videoPlayedTime;
+        dailyStatistic.videoViewCount = videoViewCount;
+        dailyStatistic.advertisementViewCount = advertisementViewCount;
+        dailyStatistic.statisticDate = statisticDate;
+        return dailyStatistic;
+    }
+
+    //    public static DailyStatistic fromPlaybackLog(PlaybackLog playbackLog) {
 //        DailyStatistic dailyStatistic = new DailyStatistic();
 //        dailyStatistic.videoPlayedTime = playbackLog.getVideoPlayedTime();
 //        dailyStatistic.videoViewCount = playbackLog.getIsNewView() ? 1L : 0L;
@@ -48,15 +64,4 @@ public class DailyStatistic {
 //        dailyStatistic.uploaderId = playbackLog.getUploaderId();
 //        return dailyStatistic;
 //    }
-
-    public static DailyStatistic fromSummary(PlaybackSummary playbackSummary, LocalDateTime statisticDate) {
-        DailyStatistic dailyStatistic = new DailyStatistic();
-        dailyStatistic.videoPlayedTime = playbackSummary.getVideoPlayedTime();
-        dailyStatistic.videoViewCount = playbackSummary.getVideoViewCount();
-        dailyStatistic.advertisementViewCount = playbackSummary.getAdvertisementViewCount();
-        dailyStatistic.statisticDate = statisticDate.toLocalDate();
-        dailyStatistic.videoId = playbackSummary.getVideoId();
-        dailyStatistic.uploaderId = playbackSummary.getUploaderId();
-        return dailyStatistic;
-    }
 }
