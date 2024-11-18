@@ -45,7 +45,12 @@ public class SecurityConfig {
 
         // 경로 인가 설정
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**", "/oauth2/**", "/login/**").permitAll()
+                .requestMatchers(
+                        "/auth/**",
+                        "/oauth2/**",
+                        "/login/**",
+                        "/actuator/**"
+                ).permitAll()
                 .anyRequest().authenticated());
 
         return http.build();

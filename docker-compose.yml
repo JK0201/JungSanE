@@ -24,6 +24,12 @@ x-health-checks:
     timeout: 10s
     retries: 5
 
+  prometheus: &prometheus_health_check
+    test: wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1
+    interval: 10s
+    timeout: 5s
+    retries: 5
+  
   redis: &redis_health_check
     test: redis-cli ping
     interval: 5s
@@ -93,15 +99,44 @@ services:
   #      - kafka
   #    restart: unless-stopped
 
+  ### Monitoring ###
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - monitoring_network
+      - app_network
+    healthcheck: *prometheus_health_check
+    restart: unless-stopped
+
+  # Grafana
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    networks:
+      - monitoring_network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+  
   ### Redis ###
   # video-service
   cache-server:
-    image: redis
+    image: redis:latest
     ports:
       - "6379:6379"
-    healthcheck: *redis_health_check
     networks:
       - video_network
+    healthcheck: *redis_health_check
+    restart: unless-stopped
 
   ### USER SERVICE ###
   # DBs
@@ -244,6 +279,7 @@ volumes:
 
 networks:
   kafka_network:
+  monitoring_network:
   user_network:
   video_network:
   adjustment_network:
