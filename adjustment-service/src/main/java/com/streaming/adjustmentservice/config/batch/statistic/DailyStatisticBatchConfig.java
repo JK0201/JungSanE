@@ -2,7 +2,6 @@ package com.streaming.adjustmentservice.config.batch.statistic;
 
 import com.streaming.adjustmentservice.entity.statistic.DailyStatistic;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepScope;
@@ -31,7 +30,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import static com.streaming.common.constant.DatasourceConstant.READ_DATASOURCE;
 import static com.streaming.common.constant.DatasourceConstant.WRITE_DATASOURCE;
 
-@Slf4j
 @Configuration
 @RequiredArgsConstructor
 public class DailyStatisticBatchConfig {
@@ -39,10 +37,13 @@ public class DailyStatisticBatchConfig {
     private final JobRepository jobRepository;
 
     @Value("${spring.batch.statistics.thread-count}")
-    private int threadCount;
+    private int THREAD_COUNT;
+
+    @Value("${spring.batch.statistics.partition-size}")
+    private int PARTITION_SIZE;
 
     @Value("${spring.batch.statistics.chunk-size}")
-    private int chunkSize;
+    private int CHUNK_SIZE;
 
     private final LocalDateTime batchStartTime = LocalDateTime.now();
     // 배치 시작 시간 -> (시작 시 - 2시간) : 00분 : 00초
@@ -73,9 +74,9 @@ public class DailyStatisticBatchConfig {
             DataSource writeDataSource
     ) {
         return new StepBuilder("dailyStatisticStep", jobRepository)
-                .partitioner("statisticPartition", statisticPartitioner(readDataSource))
+                .partitioner("statisticPartitioner", statisticPartitioner(readDataSource))
                 .step(statisticSlaveStep(transactionManager, readDataSource, writeDataSource))
-                .gridSize(threadCount * 2)
+                .gridSize(PARTITION_SIZE)
                 .taskExecutor(statisticTaskExecutor())
                 .build();
     }
@@ -87,7 +88,7 @@ public class DailyStatisticBatchConfig {
             DataSource writeDataSource
     ) {
         return new StepBuilder("statisticSlaveStep", jobRepository)
-                .<DailyStatistic, DailyStatistic>chunk(chunkSize, transactionManager)
+                .<DailyStatistic, DailyStatistic>chunk(CHUNK_SIZE, transactionManager)
                 .reader(dailyStatisticReader(readDataSource, null, null))
                 .writer(dailyStatisticWriter(writeDataSource))
                 .build();
@@ -182,8 +183,8 @@ public class DailyStatisticBatchConfig {
     @Bean
     public TaskExecutor statisticTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(threadCount); // 기본적으로 유지할 쓰레드 수
-        executor.setMaxPoolSize(threadCount); // 최대로 생성할 수 있는 쓰레드 수
+        executor.setCorePoolSize(THREAD_COUNT); // 기본적으로 유지할 쓰레드 수
+        executor.setMaxPoolSize(THREAD_COUNT); // 최대로 생성할 수 있는 쓰레드 수
         executor.setThreadNamePrefix("statistic-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy()); // 큐가 가득 찼을 경우 처리 방식
 

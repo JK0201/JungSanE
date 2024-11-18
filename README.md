@@ -3,7 +3,7 @@
   <a href="https://git.io/typing-svg">
     <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=500&pause=10000&color=58A6FF&center=true&random=false&width=435&lines=Jung San E" alt="Typing SVG" />
   </a>
-  <p>[ 2024.04.02  ]</p>
+  <p>[ 2024.10.16 - 2024.11.12 ]</p>
 
 [![Velog](https://img.shields.io/badge/url-222222.svg?style=for-the-badge&logo=velog&logoColor=white)](https://velog.io/@catwalk/series/Project)
 </div>

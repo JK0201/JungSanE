@@ -1,4 +1,4 @@
-package com.streaming.adjustmentservice.config.batch.statistic;
+package com.streaming.adjustmentservice.config.batch.settlement;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,36 +6,33 @@ import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
-public class StatisticPartitioner implements Partitioner {
+public class SettlementPartitioner implements Partitioner {
 
     private final JdbcTemplate jdbcTemplate;
-    private final LocalDateTime START_TIME;
-    private final LocalDateTime END_TIME;
+    private final LocalDate TARGET_DATE;
 
     @Override
     public Map<String, ExecutionContext> partition(int gridSize) {
         IdRange idRange = jdbcTemplate.queryForObject("""
-                        SELECT MIN(video_id) AS min_id, MAX(video_id) AS max_id 
-                        FROM playback_log 
-                        WHERE created_at >= ?
-                        AND created_at < ?
+                        SELECT MIN(daily_statistic_id) AS min_statistic_id, MAX(daily_statistic_id) AS max_statistic_id
+                        FROM daily_statistic\s
+                        WHERE statistic_date = ?
                         """,
                 (rs, rowNum) -> new IdRange(
-                        rs.getLong("min_id"),
-                        rs.getLong("max_id")
+                        rs.getLong("min_statistic_id"),
+                        rs.getLong("max_statistic_id")
                 ),
-                START_TIME,
-                END_TIME
+                TARGET_DATE
         );
 
         if (idRange == null || idRange.minId() == null || idRange.maxId() == null) {
-            log.warn("No data found range: {} ~ {}", START_TIME, END_TIME);
+            log.warn("No data found for date: {}", TARGET_DATE);
             return Map.of();
         }
 
@@ -52,10 +49,10 @@ public class StatisticPartitioner implements Partitioner {
             long start = minId + (i * range);
             long end = i == gridSize - 1 ? maxId + 1 : minId + ((i + 1) * range);
 
-            context.putLong("minVideoId", start);
-            context.putLong("maxVideoId", end);
+            context.putLong("minStatisticId", start);
+            context.putLong("maxStatisticId", end);
 
-            log.info("Partition {}: Video ID {} ~ {}", i, start, end);
+            log.info("Partition {}: ID {} ~ {}", i, start, end);
             partitions.put("partition" + i, context);
         }
 
@@ -65,4 +62,3 @@ public class StatisticPartitioner implements Partitioner {
     private record IdRange(Long minId, Long maxId) {
     }
 }
-
