@@ -6,9 +6,6 @@ import com.streaming.adjustmentservice.entity.settlement.DailySettlement;
 import com.streaming.adjustmentservice.entity.settlement.VideoSnapshot;
 import com.streaming.adjustmentservice.entity.statistic.DailyStatistic;
 import com.streaming.adjustmentservice.service.RevenueCalculatorService;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -17,9 +14,12 @@ import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.database.JpaPagingItemReader;
-import org.springframework.batch.item.database.builder.JpaPagingItemReaderBuilder;
+import org.springframework.batch.item.database.JdbcBatchItemWriter;
+import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
+import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.batch.item.support.CompositeItemWriter;
+import org.springframework.batch.item.support.builder.CompositeItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -32,17 +32,17 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.streaming.common.constant.DatasourceConstant.READ_DATASOURCE;
+import static com.streaming.common.constant.DatasourceConstant.WRITE_DATASOURCE;
 
 @Configuration
 @RequiredArgsConstructor
 public class DailySettlementBatchConfig {
 
     private final JobRepository jobRepository;
-    private final EntityManagerFactory entityManagerFactory;
     private final RevenueCalculatorService revenueCalculatorService;
 
     @Value("${spring.batch.settlements.thread-count}")
@@ -60,21 +60,23 @@ public class DailySettlementBatchConfig {
     @Bean
     public Job dailySettlementJob(
             @Qualifier("metaTransactionManager") PlatformTransactionManager transactionManager,
-            @Qualifier(READ_DATASOURCE) DataSource readDataSource
+            @Qualifier(READ_DATASOURCE) DataSource readDataSource,
+            @Qualifier(WRITE_DATASOURCE) DataSource writeDataSource
     ) {
         return new JobBuilder("dailySettlementJob", jobRepository)
-                .start(dailySettlementStep(transactionManager, readDataSource))
+                .start(dailySettlementStep(transactionManager, readDataSource, writeDataSource))
                 .build();
     }
 
     @Bean
     public Step dailySettlementStep(
             PlatformTransactionManager transactionManager,
-            DataSource readDataSource
+            DataSource readDataSource,
+            DataSource writeDataSource
     ) {
         return new StepBuilder("dailySettlementStep", jobRepository)
                 .partitioner("settlementPartitioner", settlementPartitioner(readDataSource))
-                .step(settlementSlaveStep(transactionManager))
+                .step(settlementSlaveStep(transactionManager, readDataSource, writeDataSource))
                 .gridSize(PARTITION_SIZE)
                 .taskExecutor(settlementTaskExecutor())
                 .build();
@@ -82,39 +84,69 @@ public class DailySettlementBatchConfig {
 
     @Bean
     public Step settlementSlaveStep(
-            PlatformTransactionManager transactionManager
+            PlatformTransactionManager transactionManager,
+            DataSource readDataSource,
+            DataSource writeDataSource
     ) {
         return new StepBuilder("settlementSlaveStep", jobRepository)
                 .<StatisticWrapper, SettlementWrapper>chunk(CHUNK_SIZE, transactionManager)
-                .reader(dailySettlementReader(null, null))
+                .reader(dailySettlementReader(readDataSource, null, null))
                 .processor(dailySettlementProcessor())
-                .writer(dailySettlementWriter())
+                .writer(dailySettlementWriter(writeDataSource))
                 .build();
     }
 
     @Bean
     @StepScope
-    public JpaPagingItemReader<StatisticWrapper> dailySettlementReader(
+    public JdbcCursorItemReader<StatisticWrapper> dailySettlementReader(
+            @Qualifier(READ_DATASOURCE) DataSource readDataSource,
             @Value("#{stepExecutionContext[minStatisticId]}") Long minStatisticId,
             @Value("#{stepExecutionContext[maxStatisticId]}") Long maxStatisticId
     ) {
-        return new JpaPagingItemReaderBuilder<StatisticWrapper>()
+        return new JdbcCursorItemReaderBuilder<StatisticWrapper>()
                 .name("dailySettlementReader")
-                .entityManagerFactory(entityManagerFactory)
-                .pageSize(CHUNK_SIZE)
-                .queryString("""
-                        select new com.streaming.adjustmentservice.dto.StatisticWrapper(ds, vs)
-                        from DailyStatistic ds
-                        left join VideoSnapshot vs on vs.videoId = ds.videoId
-                        where ds.statisticDate = :TARGET_DATE
-                        and ds.id >= :minStatisticId
-                        and ds.id < :maxStatisticId
+                .fetchSize(CHUNK_SIZE)
+                .dataSource(readDataSource)
+                .sql("""
+                        SELECT
+                            ds.*, 
+                            vs.video_id as vs_video_id, 
+                            vs.video_view_count as vs_video_view_count, 
+                            vs.advertisement_view_count as vs_advertisement_view_count, 
+                            vs.snapshot_date as vs_snapshot_date
+                        FROM daily_statistic ds 
+                        LEFT JOIN video_snapshot vs ON vs.video_id = ds.video_id 
+                        WHERE ds.statistic_date = ? 
+                        AND ds.daily_statistic_id >= ? 
+                        AND ds.daily_statistic_id < ? 
+                        ORDER BY ds.daily_statistic_id
                         """)
-                .parameterValues(Map.of(
-                        "TARGET_DATE", TARGET_DATE,
-                        "minStatisticId", minStatisticId,
-                        "maxStatisticId", maxStatisticId
-                ))
+                .preparedStatementSetter(ps -> {
+                    ps.setDate(1, java.sql.Date.valueOf(TARGET_DATE));
+                    ps.setLong(2, minStatisticId);
+                    ps.setLong(3, maxStatisticId);
+                })
+                .rowMapper((rs, rowNum) -> {
+                    DailyStatistic dailyStatistic = DailyStatistic.of(
+                            rs.getLong("video_id"),
+                            rs.getLong("uploader_id"),
+                            rs.getLong("video_played_time"),
+                            rs.getLong("video_view_count"),
+                            rs.getLong("advertisement_view_count"),
+                            rs.getDate("statistic_date").toLocalDate()
+                    );
+
+                    Long snapshotVideoId = rs.getObject("vs_video_id", Long.class);
+                    VideoSnapshot videoSnapshot =
+                            snapshotVideoId != null ? VideoSnapshot.of(
+                                    rs.getLong("vs_video_id"),
+                                    rs.getLong("vs_video_view_count"),
+                                    rs.getLong("vs_advertisement_view_count"),
+                                    rs.getDate("vs_snapshot_date").toLocalDate()
+                            ) : null;
+
+                    return new StatisticWrapper(dailyStatistic, videoSnapshot);
+                })
                 .build();
     }
 
@@ -126,9 +158,9 @@ public class DailySettlementBatchConfig {
 
             if (videoSnapshot == null) {
                 videoSnapshot = VideoSnapshot.fromStatistic(dailyStatistic);
+            } else {
+                videoSnapshot.updateSnapshot(dailyStatistic);
             }
-
-            videoSnapshot.updateSnapshot(dailyStatistic);
 
             long totalVideoViews = videoSnapshot.getVideoViewCount();
             long currentVideoViews = dailyStatistic.getVideoViewCount();
@@ -160,24 +192,65 @@ public class DailySettlementBatchConfig {
     }
 
     @Bean
-    public ItemWriter<SettlementWrapper> dailySettlementWriter() {
-        return settlementResult -> {
-            EntityManager em = entityManagerFactory.createEntityManager();
-            EntityTransaction tx = em.getTransaction();
+    public CompositeItemWriter<SettlementWrapper> dailySettlementWriter(
+            @Qualifier(WRITE_DATASOURCE) DataSource writeDataSource
+    ) {
+        return new CompositeItemWriterBuilder<SettlementWrapper>()
+                .delegates(List.of(
+                        videoSnapshot(writeDataSource),
+                        dailySettlement(writeDataSource)
+                ))
+                .build();
+    }
 
-            try {
-                tx.begin();
-                for (SettlementWrapper wrapper : settlementResult) {
-                    em.merge(wrapper.getVideoSnapshot());
-                    em.merge(wrapper.getDailySettlement());
-                }
-                tx.commit();
-            } catch (Exception ex) {
-                tx.rollback();
-            } finally {
-                em.close();
-            }
-        };
+    @Bean
+    public JdbcBatchItemWriter<SettlementWrapper> videoSnapshot(DataSource writeDataSource) {
+        return new JdbcBatchItemWriterBuilder<SettlementWrapper>()
+                .dataSource(writeDataSource)
+                .sql("""
+                        INSERT INTO video_snapshot (
+                            video_id, video_view_count,
+                            advertisement_view_count, snapshot_date
+                        ) VALUES (?, ?, ?, ?)
+                        ON CONFLICT (video_id)
+                        DO UPDATE SET
+                            video_view_count = ?,
+                            advertisement_view_count = ?,
+                            snapshot_date = ?
+                        """)
+                .itemPreparedStatementSetter((item, ps) -> {
+                    VideoSnapshot videoSnapshot = item.getVideoSnapshot();
+                    ps.setLong(1, videoSnapshot.getVideoId());
+                    ps.setLong(2, videoSnapshot.getVideoViewCount());
+                    ps.setLong(3, videoSnapshot.getAdvertisementViewCount());
+                    ps.setDate(4, java.sql.Date.valueOf(videoSnapshot.getSnapshotDate()));
+                    ps.setLong(5, videoSnapshot.getVideoViewCount());
+                    ps.setLong(6, videoSnapshot.getAdvertisementViewCount());
+                    ps.setDate(7, java.sql.Date.valueOf(videoSnapshot.getSnapshotDate()));
+                })
+                .build();
+    }
+
+    @Bean
+    public JdbcBatchItemWriter<SettlementWrapper> dailySettlement(DataSource writeDataSource) {
+        return new JdbcBatchItemWriterBuilder<SettlementWrapper>()
+                .dataSource(writeDataSource)
+                .sql("""
+                        INSERT INTO daily_settlement (
+                            video_id, uploader_id, settlement_date,
+                            video_revenue, advertisement_revenue, total_revenue
+                        ) VALUES (?, ?, ?, ?, ?, ?)
+                        """)
+                .itemPreparedStatementSetter((item, ps) -> {
+                    DailySettlement dailySettlement = item.getDailySettlement();
+                    ps.setLong(1, dailySettlement.getVideoId());
+                    ps.setLong(2, dailySettlement.getUploaderId());
+                    ps.setDate(3, java.sql.Date.valueOf(dailySettlement.getSettlementDate()));
+                    ps.setBigDecimal(4, dailySettlement.getVideoRevenue());
+                    ps.setBigDecimal(5, dailySettlement.getAdvertisementRevenue());
+                    ps.setBigDecimal(6, dailySettlement.getTotalRevenue());
+                })
+                .build();
     }
 
     @Bean

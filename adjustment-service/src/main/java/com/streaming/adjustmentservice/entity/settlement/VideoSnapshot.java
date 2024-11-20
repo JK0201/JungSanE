@@ -10,7 +10,13 @@ import java.time.LocalDate;
 
 @Entity
 @Getter
-@Table(name = "videoSnapshot")
+@Table(name = "video_snapshot",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_video_snapshot_video_id",
+                        columnNames = {"video_id"}
+                )
+        })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class VideoSnapshot {
 
@@ -31,6 +37,15 @@ public class VideoSnapshot {
     @Column(nullable = false)
     private LocalDate snapshotDate;
 
+    public static VideoSnapshot of(long videoId, long videoViewCount, long advertisementViewCount, LocalDate snapshotDate) {
+        VideoSnapshot videoSnapshot = new VideoSnapshot();
+        videoSnapshot.videoViewCount = videoViewCount;
+        videoSnapshot.advertisementViewCount = advertisementViewCount;
+        videoSnapshot.snapshotDate = snapshotDate;
+        videoSnapshot.videoId = videoId;
+        return videoSnapshot;
+    }
+
     public static VideoSnapshot fromStatistic(DailyStatistic dailyStatistic) {
         VideoSnapshot videoSnapshot = new VideoSnapshot();
         videoSnapshot.videoViewCount = dailyStatistic.getVideoViewCount();
@@ -48,7 +63,7 @@ public class VideoSnapshot {
 //        videoSnapshot.snapshotDate = yesterday;
 //        return videoSnapshot;
 //    }
-    
+
     public void updateSnapshot(DailyStatistic dailyStatistic) {
         this.videoViewCount += dailyStatistic.getVideoViewCount();
         this.advertisementViewCount += dailyStatistic.getAdvertisementViewCount();

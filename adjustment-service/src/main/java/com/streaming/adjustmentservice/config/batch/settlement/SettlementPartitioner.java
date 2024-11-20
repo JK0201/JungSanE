@@ -21,7 +21,7 @@ public class SettlementPartitioner implements Partitioner {
     public Map<String, ExecutionContext> partition(int gridSize) {
         IdRange idRange = jdbcTemplate.queryForObject("""
                         SELECT MIN(daily_statistic_id) AS min_statistic_id, MAX(daily_statistic_id) AS max_statistic_id
-                        FROM daily_statistic\s
+                        FROM daily_statistic
                         WHERE statistic_date = ?
                         """,
                 (rs, rowNum) -> new IdRange(

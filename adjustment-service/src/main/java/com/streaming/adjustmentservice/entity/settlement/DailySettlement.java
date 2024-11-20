@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 @Entity
 @Getter
-@Table(name = "dailySettlements")
+@Table(name = "dailySettlement")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DailySettlement {
 

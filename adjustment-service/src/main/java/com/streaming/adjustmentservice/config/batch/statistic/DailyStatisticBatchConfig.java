@@ -8,9 +8,9 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,6 +104,7 @@ public class DailyStatisticBatchConfig {
     ) {
         return new JdbcCursorItemReaderBuilder<DailyStatistic>()
                 .name("dailyStatisticReader")
+                .fetchSize(CHUNK_SIZE)
                 .dataSource(readDataSource)
                 .sql("""
                         SELECT 
@@ -120,6 +121,12 @@ public class DailyStatisticBatchConfig {
                         GROUP BY video_id, uploader_id 
                         ORDER BY video_id
                         """)
+                .preparedStatementSetter(ps -> {
+                    ps.setTimestamp(1, Timestamp.valueOf(START_TIME));
+                    ps.setTimestamp(2, Timestamp.valueOf(END_TIME));
+                    ps.setLong(3, minVideoId);
+                    ps.setLong(4, maxVideoId);
+                })
                 .rowMapper((rs, rowNum) -> DailyStatistic.of(
                         rs.getLong("video_id"),
                         rs.getLong("uploader_id"),
@@ -128,48 +135,38 @@ public class DailyStatisticBatchConfig {
                         rs.getLong("advertisement_view_count"),
                         START_TIME.toLocalDate()
                 ))
-                .preparedStatementSetter(ps -> {
-                    ps.setTimestamp(1, Timestamp.valueOf(START_TIME));
-                    ps.setTimestamp(2, Timestamp.valueOf(END_TIME));
-                    ps.setLong(3, minVideoId);
-                    ps.setLong(4, maxVideoId);
-                })
                 .build();
     }
 
     // DailyStatistic 저장
     @Bean
-    public ItemWriter<DailyStatistic> dailyStatisticWriter(
+    public JdbcBatchItemWriter<DailyStatistic> dailyStatisticWriter(
             @Qualifier(WRITE_DATASOURCE) DataSource writeDataSource
     ) {
-        JdbcBatchItemWriter<DailyStatistic> writer = new JdbcBatchItemWriter<>();
-        writer.setDataSource(writeDataSource);
-        writer.setSql("""
-                INSERT INTO daily_statistic (
-                    video_id, uploader_id, video_played_time, 
-                    video_view_count, advertisement_view_count, 
-                    statistic_date
-                ) VALUES (
-                    ?, ?, ?, ?, ?, ?
-                )
-                ON CONFLICT (video_id, statistic_date)  
-                DO UPDATE SET 
-                    video_played_time = daily_statistic.video_played_time + EXCLUDED.video_played_time,
-                    video_view_count = daily_statistic.video_view_count + EXCLUDED.video_view_count,
-                    advertisement_view_count = daily_statistic.advertisement_view_count + EXCLUDED.advertisement_view_count,
-                    uploader_id = EXCLUDED.uploader_id
-                """);
-
-        writer.setItemPreparedStatementSetter((item, ps) -> {
-            ps.setLong(1, item.getVideoId());
-            ps.setLong(2, item.getUploaderId());
-            ps.setLong(3, item.getVideoPlayedTime());
-            ps.setLong(4, item.getVideoViewCount());
-            ps.setLong(5, item.getAdvertisementViewCount());
-            ps.setDate(6, Date.valueOf(item.getStatisticDate()));
-        });
-
-        return writer;
+        return new JdbcBatchItemWriterBuilder<DailyStatistic>()
+                .dataSource(writeDataSource)
+                .sql("""
+                        INSERT INTO daily_statistic (
+                            video_id, uploader_id, video_played_time, 
+                            video_view_count, advertisement_view_count, 
+                            statistic_date
+                        ) VALUES (?, ?, ?, ?, ?, ?) 
+                        ON CONFLICT (video_id, statistic_date) 
+                        DO UPDATE SET 
+                            video_played_time = daily_statistic.video_played_time + EXCLUDED.video_played_time,
+                            video_view_count = daily_statistic.video_view_count + EXCLUDED.video_view_count,
+                            advertisement_view_count = daily_statistic.advertisement_view_count + EXCLUDED.advertisement_view_count,
+                            uploader_id = EXCLUDED.uploader_id
+                        """)
+                .itemPreparedStatementSetter((item, ps) -> {
+                    ps.setLong(1, item.getVideoId());
+                    ps.setLong(2, item.getUploaderId());
+                    ps.setLong(3, item.getVideoPlayedTime());
+                    ps.setLong(4, item.getVideoViewCount());
+                    ps.setLong(5, item.getAdvertisementViewCount());
+                    ps.setDate(6, Date.valueOf(item.getStatisticDate()));
+                })
+                .build();
     }
 
     @Bean

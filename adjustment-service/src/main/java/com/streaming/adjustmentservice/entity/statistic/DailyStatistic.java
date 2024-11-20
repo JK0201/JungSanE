@@ -15,8 +15,7 @@ import java.time.LocalDate;
                         name = "uk_daily_statistic_video_date",
                         columnNames = {"video_id", "statistic_date"}
                 )
-        }
-)
+        })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DailyStatistic {
 
