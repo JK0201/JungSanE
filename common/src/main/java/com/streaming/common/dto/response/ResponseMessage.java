@@ -5,6 +5,5 @@ import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder
-
 public class ResponseMessage {
 }

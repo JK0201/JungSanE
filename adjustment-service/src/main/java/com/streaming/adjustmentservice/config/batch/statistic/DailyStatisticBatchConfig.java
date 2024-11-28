@@ -1,6 +1,7 @@
 package com.streaming.adjustmentservice.config.batch.statistic;
 
 import com.streaming.adjustmentservice.entity.statistic.DailyStatistic;
+import com.streaming.adjustmentservice.entity.statistic.PeriodType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -12,6 +13,8 @@ import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
 import org.springframework.batch.item.database.builder.JdbcBatchItemWriterBuilder;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.batch.item.support.CompositeItemWriter;
+import org.springframework.batch.item.support.builder.CompositeItemWriterBuilder;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +27,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import javax.sql.DataSource;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.streaming.common.constant.DatasourceConstant.READ_DATASOURCE;
@@ -45,16 +50,20 @@ public class DailyStatisticBatchConfig {
     @Value("${spring.batch.statistics.chunk-size}")
     private int CHUNK_SIZE;
 
-    private final LocalDateTime batchStartTime = LocalDateTime.now();
-    // 배치 시작 시간 -> (시작 시 - 2시간) : 00분 : 00초
-    private final LocalDateTime START_TIME = batchStartTime
-            .minusHours(2)
-            .withMinute(0)
-            .withSecond(0);
-    // 배치 종료 시간 -> (시작 시) : 00분 : 00초
-    private final LocalDateTime END_TIME = batchStartTime
-            .withMinute(0)
-            .withSecond(0);
+//    private final LocalDateTime batchStartTime = LocalDateTime.now();
+//    // 시작 시간 -> (시작 시간 - 2시간) : 00분 : 00초
+//    private final LocalDateTime START_TIME = batchStartTime
+//            .minusHours(1)
+//            .withMinute(0)
+//            .withSecond(0);
+//
+//    // 종료 시간 -> (시작 시간) : 00분 : 00초
+//    private final LocalDateTime END_TIME = batchStartTime
+//            .withMinute(0)
+//            .withSecond(0);
+
+    private final LocalDateTime START_TIME = LocalDateTime.of(2024, 10, 27, 0, 0, 0);
+    private final LocalDateTime END_TIME = LocalDateTime.of(2024, 11, 26, 0, 0, 0);
 
     @Bean
     public Job dailyStatisticJob(
@@ -94,7 +103,6 @@ public class DailyStatisticBatchConfig {
                 .build();
     }
 
-    //
     @Bean
     @StepScope
     public JdbcCursorItemReader<DailyStatistic> dailyStatisticReader(
@@ -138,11 +146,82 @@ public class DailyStatisticBatchConfig {
                 .build();
     }
 
-    // DailyStatistic 저장
     @Bean
-    public JdbcBatchItemWriter<DailyStatistic> dailyStatisticWriter(
+    public CompositeItemWriter<DailyStatistic> dailyStatisticWriter(
             @Qualifier(WRITE_DATASOURCE) DataSource writeDataSource
     ) {
+        return new CompositeItemWriterBuilder<DailyStatistic>()
+                .delegates(List.of(
+                        videoSummary(writeDataSource),
+                        dailyStatistic(writeDataSource)
+                ))
+                .build();
+    }
+
+    @Bean
+    public JdbcBatchItemWriter<DailyStatistic> videoSummary(DataSource writeDataSource) {
+        return new JdbcBatchItemWriterBuilder<DailyStatistic>()
+                .dataSource(writeDataSource)
+                .sql("""
+                        INSERT INTO video_summary (
+                            video_id, uploader_id, period_type, 
+                            video_view_count, video_played_time, 
+                            start_date, end_date, updated_at
+                        ) 
+                        VALUES
+                            (?, ?, 'DAILY', ?, ?, ?, ?, ?), 
+                            (?, ?, 'WEEKLY', ?, ?, ?, ?, ?), 
+                            (?, ?, 'MONTHLY', ?, ?, ?, ?, ?)
+                        ON CONFLICT (video_id, period_type) 
+                        DO UPDATE SET
+                            video_view_count = CASE
+                                WHEN EXCLUDED.start_date != video_summary.start_date THEN EXCLUDED.video_view_count 
+                                ELSE video_summary.video_view_count + EXCLUDED.video_view_count 
+                            END, 
+                            video_played_time = CASE
+                                WHEN EXCLUDED.start_date != video_summary.start_date THEN EXCLUDED.video_played_time 
+                                ELSE video_summary.video_played_time + EXCLUDED.video_played_time 
+                            END,
+                            start_date = EXCLUDED.start_date, 
+                            end_date = EXCLUDED.end_date, 
+                            updated_at = EXCLUDED.updated_at
+                        """)
+                .itemPreparedStatementSetter((item, ps) -> {
+                    LocalDateTime now = LocalDateTime.now();
+                    LocalDate currentDate = item.getStatisticDate();
+
+                    PeriodType.PeriodTypeRange dailyRange = PeriodType.DAILY.calculateRange(currentDate);
+                    ps.setLong(1, item.getVideoId());
+                    ps.setLong(2, item.getUploaderId());
+                    ps.setLong(3, item.getVideoViewCount());
+                    ps.setLong(4, item.getVideoPlayedTime());
+                    ps.setDate(5, Date.valueOf(dailyRange.start()));
+                    ps.setDate(6, Date.valueOf(dailyRange.end()));
+                    ps.setTimestamp(7, Timestamp.valueOf(now));
+
+                    PeriodType.PeriodTypeRange weeklyRange = PeriodType.WEEKLY.calculateRange(currentDate);
+                    ps.setLong(8, item.getVideoId());
+                    ps.setLong(9, item.getUploaderId());
+                    ps.setLong(10, item.getVideoViewCount());
+                    ps.setLong(11, item.getVideoPlayedTime());
+                    ps.setDate(12, Date.valueOf(weeklyRange.start()));
+                    ps.setDate(13, Date.valueOf(weeklyRange.end()));
+                    ps.setTimestamp(14, Timestamp.valueOf(now));
+
+                    PeriodType.PeriodTypeRange monthlyRange = PeriodType.MONTHLY.calculateRange(currentDate);
+                    ps.setLong(15, item.getVideoId());
+                    ps.setLong(16, item.getUploaderId());
+                    ps.setLong(17, item.getVideoViewCount());
+                    ps.setLong(18, item.getVideoPlayedTime());
+                    ps.setDate(19, Date.valueOf(monthlyRange.start()));
+                    ps.setDate(20, Date.valueOf(monthlyRange.end()));
+                    ps.setTimestamp(21, Timestamp.valueOf(now));
+                })
+                .build();
+    }
+
+    @Bean
+    public JdbcBatchItemWriter<DailyStatistic> dailyStatistic(DataSource writeDataSource) {
         return new JdbcBatchItemWriterBuilder<DailyStatistic>()
                 .dataSource(writeDataSource)
                 .sql("""

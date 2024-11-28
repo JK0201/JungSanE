@@ -26,7 +26,7 @@ public class VideoAdvertisement {
     @JoinColumn(name = "video_id")
     private Video video;
 
-    public static VideoAdvertisement fromVideo(Video video, Long playbackTime) {
+    public static VideoAdvertisement of(Video video, Long playbackTime) {
         VideoAdvertisement videoAdvertisement = new VideoAdvertisement();
         videoAdvertisement.playbackTime = playbackTime;
         videoAdvertisement.accumulatedViewCount = 0L;

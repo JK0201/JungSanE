@@ -73,7 +73,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
      * @param refreshToken (String)
      */
     private void saveRefreshToken(String refreshToken, Long userId) {
-        RefreshToken newRefreshToken = RefreshToken.fromCreatedToken(
+        RefreshToken newRefreshToken = RefreshToken.of(
                 refreshToken,
                 jwtUtil.getExpiryTimeFromRefreshToken(refreshToken),
                 userId);

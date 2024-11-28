@@ -1,7 +1,7 @@
 package com.streaming.adjustmentservice.config.batch.settlement;
 
-import com.streaming.adjustmentservice.dto.SettlementWrapper;
-import com.streaming.adjustmentservice.dto.StatisticWrapper;
+import com.streaming.adjustmentservice.dto.batch.SettlementWrapper;
+import com.streaming.adjustmentservice.dto.batch.StatisticWrapper;
 import com.streaming.adjustmentservice.entity.settlement.DailySettlement;
 import com.streaming.adjustmentservice.entity.settlement.VideoSnapshot;
 import com.streaming.adjustmentservice.entity.statistic.DailyStatistic;
@@ -54,8 +54,9 @@ public class DailySettlementBatchConfig {
     @Value("${spring.batch.settlements.chunk-size}")
     private int CHUNK_SIZE;
 
-    // -1일 00:00:00
-    private final LocalDate TARGET_DATE = LocalDate.now().minusDays(1);
+    // 정산 작업 시간 : (시작일 - 1일) 00:00:00
+//    private final LocalDate TARGET_DATE = LocalDate.now().minusDays(1);
+    private final LocalDate TARGET_DATE = LocalDate.of(2024, 10, 30);
 
     @Bean
     public Job dailySettlementJob(
@@ -145,7 +146,7 @@ public class DailySettlementBatchConfig {
                                     rs.getDate("vs_snapshot_date").toLocalDate()
                             ) : null;
 
-                    return new StatisticWrapper(dailyStatistic, videoSnapshot);
+                    return StatisticWrapper.of(dailyStatistic, videoSnapshot);
                 })
                 .build();
     }
@@ -156,11 +157,8 @@ public class DailySettlementBatchConfig {
             DailyStatistic dailyStatistic = statisticWrapper.getDailyStatistic();
             VideoSnapshot videoSnapshot = statisticWrapper.getVideoSnapshot();
 
-            if (videoSnapshot == null) {
-                videoSnapshot = VideoSnapshot.fromStatistic(dailyStatistic);
-            } else {
-                videoSnapshot.updateSnapshot(dailyStatistic);
-            }
+            if (videoSnapshot == null) videoSnapshot = VideoSnapshot.from(dailyStatistic);
+            else videoSnapshot.updateSnapshot(dailyStatistic);
 
             long totalVideoViews = videoSnapshot.getVideoViewCount();
             long currentVideoViews = dailyStatistic.getVideoViewCount();
@@ -179,7 +177,8 @@ public class DailySettlementBatchConfig {
             Long videoId = dailyStatistic.getVideoId();
             Long uploaderId = dailyStatistic.getUploaderId();
             LocalDate settlementDate = dailyStatistic.getStatisticDate();
-            DailySettlement dailySettlement = DailySettlement.fromRevenue(
+
+            DailySettlement dailySettlement = DailySettlement.of(
                     videoRevenue,
                     advertisementRevenue,
                     settlementDate,
@@ -187,7 +186,7 @@ public class DailySettlementBatchConfig {
                     uploaderId
             );
 
-            return SettlementWrapper.from(dailySettlement, videoSnapshot);
+            return SettlementWrapper.of(dailySettlement, videoSnapshot);
         };
     }
 

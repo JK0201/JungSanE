@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Table(name = "video_snapshot",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_video_snapshot_video_id",
+                        name = "uk_video_id",
                         columnNames = {"video_id"}
                 )
         })
@@ -46,7 +46,7 @@ public class VideoSnapshot {
         return videoSnapshot;
     }
 
-    public static VideoSnapshot fromStatistic(DailyStatistic dailyStatistic) {
+    public static VideoSnapshot from(DailyStatistic dailyStatistic) {
         VideoSnapshot videoSnapshot = new VideoSnapshot();
         videoSnapshot.videoViewCount = dailyStatistic.getVideoViewCount();
         videoSnapshot.advertisementViewCount = dailyStatistic.getAdvertisementViewCount();
@@ -54,15 +54,6 @@ public class VideoSnapshot {
         videoSnapshot.videoId = dailyStatistic.getVideoId();
         return videoSnapshot;
     }
-
-//    public static VideoSnapshot test(long videoId, long videoViewCount, long advertisementViewCount, LocalDate yesterday) {
-//        VideoSnapshot videoSnapshot = new VideoSnapshot();
-//        videoSnapshot.videoId = videoId;
-//        videoSnapshot.videoViewCount = videoViewCount;
-//        videoSnapshot.advertisementViewCount = advertisementViewCount;
-//        videoSnapshot.snapshotDate = yesterday;
-//        return videoSnapshot;
-//    }
 
     public void updateSnapshot(DailyStatistic dailyStatistic) {
         this.videoViewCount += dailyStatistic.getVideoViewCount();

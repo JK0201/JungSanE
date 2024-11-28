@@ -35,7 +35,7 @@ public class User extends Timestamped {
     @Column(nullable = false)
     private AuthProvider authProvider;
 
-    public static User fromOAuth(String username, OAuth2Response oAuth2Response, AuthProvider authProvider) {
+    public static User from(String username, OAuth2Response oAuth2Response, AuthProvider authProvider) {
         User user = new User();
         user.email = oAuth2Response.getEmail();
         user.username = username;

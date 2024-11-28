@@ -59,7 +59,7 @@ public class AuthCommandServiceImpl implements AuthCommandService {
             existingToken.update(newRefreshToken, jwtUtil.getExpiryTimeFromRefreshToken(refreshToken));
 
             // 새로 발급 받은 Access Token과 Refresh Token을 DTO로 반환
-            return TokenWrapper.from(newAccessToken, newRefreshToken);
+            return TokenWrapper.of(newAccessToken, newRefreshToken);
         } catch (Exception ex) {
             throw new InvalidTokenException("Token reissue failed");
         }

@@ -55,7 +55,7 @@ public class PlaybackCommandServiceImpl implements PlaybackCommandService {
                     .orElseGet(() -> {
                         Video video = videoRepository.findByIdAndStatus(videoId, VideoStatus.ACTIVE)
                                 .orElseThrow(() -> new ResourceNotFoundException("해당 영상을 찾을 수 없습니다."));
-                        return playbackRepository.save(Playback.createPlayback(userId, video));
+                        return playbackRepository.save(Playback.of(userId, video));
                     });
 
             // 해당 영상 업로더가 아닐 경우 블록 내부 진행
@@ -83,7 +83,7 @@ public class PlaybackCommandServiceImpl implements PlaybackCommandService {
                 }
             }
 
-            return PlaybackResponse.from(playback);
+            return PlaybackResponse.of(playback);
         });
     }
 
@@ -93,7 +93,6 @@ public class PlaybackCommandServiceImpl implements PlaybackCommandService {
      * - 마지막 재생 위치 업데이트
      * - 해당 영상 업로더가 아닌 시청자의 경우, 광고 조회수 및 시청 시간 기록
      * - adjustment-service에 PlaybackLog(로그 데이터) 생성 및
-     * FIXME adjustment-service 요청 마무리 (Kafka예정)
      *
      * @param videoId   시청 종료 videoId (Long)
      * @param videoStop 종료 시점 재생 위치 (StopRequest)

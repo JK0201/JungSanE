@@ -21,7 +21,7 @@ public class VideoCommandServiceImpl implements VideoCommandService {
      * @param userId       (Long)
      */
     public void publish(VideoPublish videoPublish, Long userId) {
-        Video video = Video.fromPublish(videoPublish, userId);
+        Video video = Video.from(videoPublish, userId);
         videoRepository.save(video);
     }
 }

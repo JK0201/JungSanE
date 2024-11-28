@@ -32,11 +32,11 @@ public class Playback extends Timestamped {
     @JoinColumn(name = "video_id")
     private Video video;
 
-    public static Playback createPlayback(Long userId, Video video) {
+    public static Playback of(Long userId, Video video) {
         Playback playback = new Playback();
         playback.userId = userId;
         playback.lastPlayPosition = 0L;
-        playback.status = PlaybackStatus.PROGRESS; // 추후 배치 작업시 : true -> 조회수 포함, false -> 조회수 미포함
+        playback.status = PlaybackStatus.PROGRESS;
         playback.video = video;
         return playback;
     }

@@ -1,4 +1,4 @@
-package com.streaming.adjustmentservice.dto;
+package com.streaming.adjustmentservice.dto.batch;
 
 import com.streaming.adjustmentservice.entity.settlement.DailySettlement;
 import com.streaming.adjustmentservice.entity.settlement.VideoSnapshot;
@@ -12,7 +12,7 @@ public class SettlementWrapper {
     private final DailySettlement dailySettlement;
     private final VideoSnapshot videoSnapshot;
 
-    public static SettlementWrapper from(DailySettlement dailySettlement, VideoSnapshot videoSnapshot) {
+    public static SettlementWrapper of(DailySettlement dailySettlement, VideoSnapshot videoSnapshot) {
         return SettlementWrapper.builder()
                 .dailySettlement(dailySettlement)
                 .videoSnapshot(videoSnapshot)

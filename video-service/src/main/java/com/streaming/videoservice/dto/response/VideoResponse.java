@@ -21,7 +21,7 @@ public class VideoResponse {
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 
-    public static VideoResponse from(Video video) {
+    public static VideoResponse of(Video video) {
         return VideoResponse.builder()
                 .id(video.getId())
                 .uploaderId(video.getUploaderId())

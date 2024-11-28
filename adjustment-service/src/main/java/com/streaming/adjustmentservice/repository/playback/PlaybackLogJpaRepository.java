@@ -1,4 +1,4 @@
-package com.streaming.adjustmentservice.repository;
+package com.streaming.adjustmentservice.repository.playback;
 
 import com.streaming.adjustmentservice.entity.statistic.PlaybackLog;
 import org.springframework.data.jpa.repository.JpaRepository;

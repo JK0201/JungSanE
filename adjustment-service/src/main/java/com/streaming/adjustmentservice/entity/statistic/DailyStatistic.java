@@ -10,9 +10,15 @@ import java.time.LocalDate;
 @Entity
 @Getter
 @Table(name = "daily_statistic",
+        indexes = {
+                @Index(
+                        name = "idx_statistic_date_id",
+                        columnList = "statistic_date, daily_statistic_id"
+                )
+        },
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_daily_statistic_video_date",
+                        name = "uk_video_id_date",
                         columnNames = {"video_id", "statistic_date"}
                 )
         })
@@ -52,26 +58,4 @@ public class DailyStatistic {
         dailyStatistic.statisticDate = statisticDate;
         return dailyStatistic;
     }
-
-    public static DailyStatistic test(long videoId, long uploaderId, long videoPlayedTime, long videoViewCount, long advertisementViewCount, LocalDate yesterday) {
-        DailyStatistic dailyStatistic = new DailyStatistic();
-        dailyStatistic.videoId = videoId;
-        dailyStatistic.uploaderId = uploaderId;
-        dailyStatistic.videoPlayedTime = videoPlayedTime;
-        dailyStatistic.videoViewCount = videoViewCount;
-        dailyStatistic.advertisementViewCount = advertisementViewCount;
-        dailyStatistic.statisticDate = yesterday;
-        return dailyStatistic;
-    }
-
-    //    public static DailyStatistic fromPlaybackLog(PlaybackLog playbackLog) {
-//        DailyStatistic dailyStatistic = new DailyStatistic();
-//        dailyStatistic.videoPlayedTime = playbackLog.getVideoPlayedTime();
-//        dailyStatistic.videoViewCount = playbackLog.getIsNewView() ? 1L : 0L;
-//        dailyStatistic.advertisementViewCount = playbackLog.getAdvertisementViewCount();
-//        dailyStatistic.statisticDate = playbackLog.getCreatedAt().toLocalDate();
-//        dailyStatistic.videoId = playbackLog.getVideoId();
-//        dailyStatistic.uploaderId = playbackLog.getUploaderId();
-//        return dailyStatistic;
-//    }
 }

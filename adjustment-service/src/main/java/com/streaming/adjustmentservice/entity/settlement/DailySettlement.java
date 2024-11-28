@@ -37,7 +37,7 @@ public class DailySettlement {
     @Column(nullable = false)
     private LocalDate settlementDate;
 
-    public static DailySettlement fromRevenue(BigDecimal videoRevenue, BigDecimal advertisementRevenue, LocalDate settlementDate, Long videoId, Long uploaderId) {
+    public static DailySettlement of(BigDecimal videoRevenue, BigDecimal advertisementRevenue, LocalDate settlementDate, Long videoId, Long uploaderId) {
         DailySettlement dailySettlement = new DailySettlement();
         dailySettlement.videoRevenue = videoRevenue;
         dailySettlement.advertisementRevenue = advertisementRevenue;

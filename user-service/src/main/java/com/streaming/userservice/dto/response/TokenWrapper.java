@@ -10,7 +10,7 @@ public class TokenWrapper {
     private String accessToken;
     private String refreshToken;
 
-    public static TokenWrapper from(String accessToken, String refreshToken) {
+    public static TokenWrapper of(String accessToken, String refreshToken) {
         return TokenWrapper.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

@@ -27,7 +27,7 @@ public class RefreshToken {
     @Column(nullable = false)
     private LocalDateTime expiryTime;
 
-    public static RefreshToken fromCreatedToken(String createdRefreshToken, LocalDateTime expiryTime, Long userId) {
+    public static RefreshToken of(String createdRefreshToken, LocalDateTime expiryTime, Long userId) {
         RefreshToken refreshToken = new RefreshToken();
         refreshToken.refreshToken = createdRefreshToken;
         refreshToken.expiryTime = expiryTime;

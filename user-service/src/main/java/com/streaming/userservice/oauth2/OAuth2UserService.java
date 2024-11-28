@@ -77,7 +77,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
         return userRepository.findByProviderAndUsername(authProvider, username)
                 .orElseGet(() -> {
-                    User user = User.fromOAuth(username, oAuth2Response, authProvider);
+                    User user = User.from(username, oAuth2Response, authProvider);
                     return userRepository.save(user);
                 });
     }

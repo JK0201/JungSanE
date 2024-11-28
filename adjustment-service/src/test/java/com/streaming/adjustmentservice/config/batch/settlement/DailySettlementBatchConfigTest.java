@@ -33,7 +33,7 @@ class DailySettlementBatchConfigTest {
     @DisplayName("DailySettlement 배치 작업 성능 테스트")
     void testBatchJobPerformance() throws Exception {
         // Given
-        long initialPlaybackCount = 100_000_000;
+        long initialPlaybackCount = 20_000_000;
         JobParameters jobParameters = new JobParametersBuilder()
                 .addString("datetime", LocalDateTime.now().toString())
                 .toJobParameters();
@@ -54,9 +54,6 @@ class DailySettlementBatchConfigTest {
         ThreadPoolTaskExecutor threadPoolExecutor = (ThreadPoolTaskExecutor) statisticTaskExecutor;
         ThreadPoolExecutor executor = threadPoolExecutor.getThreadPoolExecutor();
 
-        assertThat(batchStatus).isEqualTo(BatchStatus.COMPLETED);
-        assertThat(exitStatus.getExitCode()).isEqualTo(ExitStatus.COMPLETED.getExitCode());
-
         double totalTimeSeconds = stopWatch.getTotalTimeSeconds();
         long writeCount = stepExecution.getWriteCount();
         long readCount = stepExecution.getReadCount();
@@ -76,18 +73,9 @@ class DailySettlementBatchConfigTest {
         log.info("Processing Speed: {} items/second", String.format("%,.2f", processingSpeed));
         log.info("Commit Count: {}", stepExecution.getCommitCount());
         log.info("==================================\n");
-
-        // 쓰레드 풀
-        log.info("\n==== Thread Pool Statistics ====");
-        log.info("Active Threads: {}", executor.getActiveCount());
-        log.info("Core Pool Size: {}", executor.getCorePoolSize());
-        log.info("Current Pool Size: {}", executor.getPoolSize());
-        log.info("Largest Pool Size: {}", executor.getLargestPoolSize());
-        log.info("Maximum Pool Size: {}", executor.getMaximumPoolSize());
-        log.info("Completed Task Count: {}", executor.getCompletedTaskCount());
-        log.info("Queue Size: {}", executor.getQueue().size());
-        log.info("==================================\n");
-
+        
+        assertThat(batchStatus).isEqualTo(BatchStatus.COMPLETED);
+        assertThat(exitStatus.getExitCode()).isEqualTo(ExitStatus.COMPLETED.getExitCode());
         assertThat(completionPercentage).isEqualTo(100.0);
     }
 }

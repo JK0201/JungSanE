@@ -18,7 +18,7 @@ public class PlaybackResponse {
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
 
-    public static PlaybackResponse from(Playback playback) {
+    public static PlaybackResponse of(Playback playback) {
         return PlaybackResponse.builder()
                 .id(playback.getId())
                 .userId(playback.getUserId())

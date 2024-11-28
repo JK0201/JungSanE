@@ -33,11 +33,12 @@ public class ApiPath {
             "/video-service/circuit-breaker/**",
 
             // Test API
+            // FIXME Test 후 삭제
             "/adjustment-service/**"
     );
 
     // Protected API (권한별 경로)
-    // FIXME 권한 ADMIN으로 전환
+    // FIXME 권한 ADMIN으로 전환 (actuator)
     public static final Map<String, Set<String>> protectedApi =
             Map.of(
                     "/video-service/api/v*/video/publish",

@@ -43,7 +43,7 @@ public class Video extends Timestamped {
     @OneToMany(mappedBy = "video", cascade = CascadeType.ALL)
     private List<VideoAdvertisement> videoAdvertisementList = new ArrayList<>();
 
-    public static Video fromPublish(VideoPublish videoPublish, Long userId) {
+    public static Video from(VideoPublish videoPublish, Long userId) {
         Video video = new Video();
         video.title = videoPublish.getTitle();
         video.description = videoPublish.getDescription();
@@ -73,7 +73,7 @@ public class Video extends Timestamped {
         int advertisementCount = (int) (playbackTime / 300);
         for (int i = 1; i <= advertisementCount; i++) {
             videoAdvertisementList.add(VideoAdvertisement
-                    .fromVideo(this, i * 300L));
+                    .of(this, i * 300L));
         }
     }
 }

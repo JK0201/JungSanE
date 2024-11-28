@@ -1,4 +1,4 @@
-package com.streaming.adjustmentservice.repository;
+package com.streaming.adjustmentservice.repository.playback;
 
 import com.streaming.adjustmentservice.entity.statistic.PlaybackLog;
 import com.streaming.adjustmentservice.service.port.PlaybackLogRepository;

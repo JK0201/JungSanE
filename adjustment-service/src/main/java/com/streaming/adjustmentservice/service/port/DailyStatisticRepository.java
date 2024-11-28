@@ -1,20 +1,18 @@
 package com.streaming.adjustmentservice.service.port;
 
-import com.streaming.adjustmentservice.entity.statistic.DailyStatistic;
-import org.springframework.batch.item.Chunk;
+import com.streaming.adjustmentservice.dto.response.Top5VideosWrapper;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public interface DailyStatisticRepository {
 
-    void saveAll(Chunk<? extends DailyStatistic> statistics);
+    List<Top5VideosWrapper> findDailyTop5VideosByViewCount(LocalDate now);
 
-    List<DailyStatistic> findDailyTop5ByVideoViewCount(LocalDate yesterday);
+    List<Top5VideosWrapper> findDailyTop5VideosByPlayedTime(LocalDate now);
 
-    void save(DailyStatistic dailyStatistic);
+    List<Top5VideosWrapper> findRangeTop5VideosByViewCount(LocalDate startDate, LocalDate endDate);
 
-    void findById(long l);
-
-    void upsertStatistic(Long videoId, Long uploaderId, Long videoPlayedTime, Long videoViewCount, Long advertisementViewCount, LocalDate statisticDate);
+    List<Top5VideosWrapper> findRangeTop5VideosByPlayedTime(LocalDate startDate, LocalDate endDate);
+    
 }
