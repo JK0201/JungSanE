@@ -37,8 +37,8 @@ public class AdjustmentController {
             HttpServletRequest request,
             @RequestParam String period
     ) {
-        Long userId = 1L;
-        SettlementResponse settlementResponse = adjustmentQueryService.getSettlements(userId, period);
+        Long uploaderId = 1L;
+        SettlementResponse settlementResponse = adjustmentQueryService.getSettlements(uploaderId, period);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

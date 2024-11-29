@@ -5,6 +5,7 @@ import com.streaming.adjustmentservice.dto.request.DateRange;
 import com.streaming.adjustmentservice.dto.response.SettlementResponse;
 import com.streaming.adjustmentservice.dto.response.StatisticResponse;
 import com.streaming.adjustmentservice.dto.response.TopVideosResponse;
+import com.streaming.adjustmentservice.entity.settlement.DailySettlement;
 import com.streaming.adjustmentservice.entity.statistic.PeriodType;
 import com.streaming.adjustmentservice.service.port.DailySettlementRepository;
 import com.streaming.adjustmentservice.service.port.VideoSummaryRepository;
@@ -26,6 +27,7 @@ public class AdjustmentQueryServiceImpl implements AdjustmentQueryService {
     private final DailySettlementRepository dailySettlementRepository;
 
     @Override
+//    @Cacheable(value = "top5Videos", key = "'period:' + #period + ':type:' + #type")
     public StatisticResponse getTop5Videos(String period, String type) {
         DateRange dateRange = calculateDateRange(period);
 
@@ -49,7 +51,6 @@ public class AdjustmentQueryServiceImpl implements AdjustmentQueryService {
         };
 
         return StatisticResponse.of(
-                period,
                 type,
                 dateRange,
                 top5VideoList
@@ -57,7 +58,7 @@ public class AdjustmentQueryServiceImpl implements AdjustmentQueryService {
     }
 
     @Override
-    public SettlementResponse getSettlements(Long userId, String period) {
+    public SettlementResponse getSettlements(Long uploaderId, String period) {
         DateRange dateRange = calculateDateRange(period);
 
         log.info("==============================");
@@ -65,15 +66,17 @@ public class AdjustmentQueryServiceImpl implements AdjustmentQueryService {
         log.info("START_DATE: {} - END_DATE: {}", dateRange.getStartDate(), dateRange.getEndDate());
         log.info("==============================");
 
-//        List<DailySettlement> settlementList = dailySettlementRepository.find
+        List<DailySettlement> settlementList = dailySettlementRepository.findVideoSettlements(
+                uploaderId,
+                dateRange.getStartDate(),
+                dateRange.getEndDate()
+        );
 
-//        return SettlementResponse.of(
-//                uploaderSettlement.getPeriod(),
-//                dateRange,
-//                userId,
-//                settlementList
-//        );
-        return null;
+        return SettlementResponse.of(
+                dateRange,
+                uploaderId,
+                settlementList
+        );
     }
 
     private DateRange calculateDateRange(String period) {

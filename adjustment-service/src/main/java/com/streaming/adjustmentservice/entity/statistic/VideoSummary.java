@@ -12,6 +12,16 @@ import java.time.LocalDateTime;
 @Getter
 @Table(
         name = "video_summary",
+        indexes = {
+                @Index(
+                        name = "idx_period_view",
+                        columnList = "period_type, video_view_count DESC"
+                ),
+                @Index(
+                        name = "idx_period_playtime",
+                        columnList = "period_type, video_played_time DESC"
+                )
+        },
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_video_id_period",

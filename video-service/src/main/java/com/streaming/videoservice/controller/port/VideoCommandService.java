@@ -7,5 +7,5 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public interface VideoCommandService {
 
-    void publish(@Valid VideoPublish videoPublish, Long userId);
+    void publish(@Valid VideoPublish videoPublish, Long uploaderId);
 }

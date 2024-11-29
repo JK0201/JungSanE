@@ -129,12 +129,22 @@ services:
   
   ### Redis ###
   # video-service
-  cache-server:
+  video-cache-server:
     image: redis:latest
     ports:
       - "6379:6379"
     networks:
       - video_network
+    healthcheck: *redis_health_check
+    restart: unless-stopped
+
+  # adjustment-service
+  adjustment-cache-server:
+    image: redis:latest
+    ports:
+      - "6380:6379"
+    networks:
+      - adjustment_network
     healthcheck: *redis_health_check
     restart: unless-stopped
 

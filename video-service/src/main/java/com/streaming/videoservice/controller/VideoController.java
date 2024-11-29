@@ -26,8 +26,8 @@ public class VideoController {
             HttpServletRequest request,
             @Valid @RequestBody VideoPublish videoPublish
     ) {
-        Long userId = RequestParser.extractUserIdFromHeader(request);
-        videoCommandService.publish(videoPublish, userId);
+        Long uploaderId = RequestParser.extractUserIdFromHeader(request);
+        videoCommandService.publish(videoPublish, uploaderId);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

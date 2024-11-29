@@ -18,10 +18,10 @@ public class VideoCommandServiceImpl implements VideoCommandService {
      * gateway-service에서 토큰 권한 검증 후, 권한 여부에 따라 실행 가능
      *
      * @param videoPublish (VideoPublish)
-     * @param userId       (Long)
+     * @param uploaderId   (Long)
      */
-    public void publish(VideoPublish videoPublish, Long userId) {
-        Video video = Video.from(videoPublish, userId);
+    public void publish(VideoPublish videoPublish, Long uploaderId) {
+        Video video = Video.from(videoPublish, uploaderId);
         videoRepository.save(video);
     }
 }

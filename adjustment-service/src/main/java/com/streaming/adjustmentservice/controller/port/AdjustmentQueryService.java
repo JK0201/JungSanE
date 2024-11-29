@@ -9,5 +9,5 @@ public interface AdjustmentQueryService {
 
     StatisticResponse getTop5Videos(String period, String type);
 
-    SettlementResponse getSettlements(Long userId, String period);
+    SettlementResponse getSettlements(Long uploaderId, String period);
 }

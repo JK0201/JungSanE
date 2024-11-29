@@ -1,5 +1,7 @@
 package com.streaming.adjustmentservice.dto.response;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.streaming.adjustmentservice.dto.request.DateRange;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,19 +10,22 @@ import java.util.List;
 
 @Getter
 @Builder
+@JsonDeserialize(builder = StatisticResponse.StatisticResponseBuilder.class)
 public class StatisticResponse {
 
-    private final String period;
     private final String type;
     private final DateRange dateRange;
     private final List<TopVideosResponse> top5Videos;
 
-    public static StatisticResponse of(String period, String type, DateRange dateRange, List<TopVideosResponse> top5VideoList) {
+    @JsonPOJOBuilder(withPrefix = "")
+    public static class StatisticResponseBuilder {
+    }
+
+    public static StatisticResponse of(String type, DateRange dateRange, List<TopVideosResponse> topVideoList) {
         return StatisticResponse.builder()
-                .period(period)
                 .type(type)
                 .dateRange(dateRange)
-                .top5Videos(top5VideoList)
+                .top5Videos(topVideoList)
                 .build();
     }
 }
