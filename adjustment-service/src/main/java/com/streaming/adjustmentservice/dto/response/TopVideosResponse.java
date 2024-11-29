@@ -5,14 +5,14 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class Top5VideosWrapper {
+public class TopVideosResponse {
 
     private final Long videoId;
     private final Long uploaderId;
     private final Long value;
 
-    public static Top5VideosWrapper of(Long videoId, Long uploaderId, Long value) {
-        return Top5VideosWrapper.builder()
+    public static TopVideosResponse of(Long videoId, Long uploaderId, Long value) {
+        return TopVideosResponse.builder()
                 .videoId(videoId)
                 .uploaderId(uploaderId)
                 .value(value)
